@@ -1,2 +1,14 @@
+# Files and folders to ignore for scala files
 *.class
 *.log
+
+# Files and folders to ignore for sbt project:
+dist/*
+target/
+lib_managed/
+src_managed/
+project/boot/
+project/plugins/project/
+.history
+.cache
+.lib/
