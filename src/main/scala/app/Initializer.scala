@@ -8,7 +8,6 @@ import java.nio.file.FileAlreadyExistsException
  * Class that create all directories and files in .sgit
 */
 
-
 class Initializer() {
     def initialise : Unit = {
         val path = new File(".").getAbsolutePath
@@ -17,12 +16,15 @@ class Initializer() {
         val sgitRepo = new File(".sgit")
         val sgitPath = path + "/.sgit/"
         
-        try {
-            sgitRepo.mkdir()
+// TO DO : Check if we're not already in a sgit project
+
+        if(sgitRepo.mkdir()) {
             folders.map( folder => new File(sgitPath + folder).mkdir())
             files.map(file => new File(sgitPath + file).createNewFile())
-         } catch {
-            case ex: FileAlreadyExistsException => println("Error... Folder already existing...")
+            println("Success: sgit project correctly initialized ! ")
+        } else {
+            println("Fail: .sgit folder already existing... Abort")
         }
+        
     }
 }
