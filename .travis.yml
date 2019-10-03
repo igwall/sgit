@@ -5,7 +5,7 @@ jobs:
   include:
     - stage: compilation
       script: 
-      - sbt -jvm-opts travis/jvmopts.compile ... compile
+      - sbt ++$TRAVIS_SCALA_VERSION test
     - stage: test
       script: 
       - sbt -jvm-opts travis/jvmopts.test ... test
