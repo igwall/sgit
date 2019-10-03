@@ -1,0 +1,11 @@
+language: scala
+scala:
+- 2.13.1
+jobs:
+  include:
+    - stage: compilation
+      script: 
+      - sbt -jvm-opts travis/jvmopts.compile ... compile
+    - stage: test
+      script: 
+      - sbt -jvm-opts travis/jvmopts.test ... test
