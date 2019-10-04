@@ -5,5 +5,14 @@ jdk: openjdk8
 scala:
   - 2.13.0
 
+addons:
+   sonarcloud: true
+
+env:
+   global:
+      - secure: OI7zZz5ISkg30Kla9Tcjsi2HjKG1zjcWlRmWW3uguhc0t1XnXoN02Sy5Jcza9EVUflMuICpsLUsCO+58Ylbeqc2wwXVdWAVmMNd17RWFGq5ud3KQ+xeyUYkwy3J8b3ongjIMiqjEH5N1+RpgQVDaI9zeU563udDabgYaC3YfAPqWKN19drDVQ1PcvaBZmMSfeS3oV3eZosjNovH526rEqFIiT2aWucUDTWtsvKxmbm+P/ixarUtvpKN+vNZA7B0hts6IIv2pDbSFmC9BLomqUo/2nSwZNYnlJNO7P+ReOZI2ek5Bz28T6iURRSbaioJmOMssYuDFXFnaVpggkYYw8kT5rX07K/JPUkl3mp5hZNAjygbQXwHJC3UfUWEcrRgtRS12g8udwvUUQQisJThh3aPNLisu82I7iSQYhn5CqfFGnLGqu3+ppUTLarUXGLJGoocdE7cETskmsh/upaLAul7eyBHeObyc8av+9ukiJl2+HJCzVS3brWM/sunaRvcALVpnShi0ZByTVxaBlvKcs759/3rc/9EzaqMDFvhrwc738Zk6KHeQkgABzxJ3m3muekz2ljFuKpV+Ijkq+1kwAwv4c1JEDHw2PVH7J7X0L+n4lwIBbbLlN5dUHQ3p+J0hlWnKpjQppZUYFyNqSsGWMdDWuyYT6Jj0eZDj0z+SDus=
+      - SONAR_HOST_URL=http://185.216.27.102:9000
+
 script:
   - sbt test
+  - sonar-scanner -D sonar.host.url=$SONAR_HOST_URL -D sonar.login=$SONAR_TOKEN -X
