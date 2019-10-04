@@ -6,9 +6,6 @@ jdk: openjdk8
 
 jobs:
   include:
-    - stage: compilation
-      script: 
-      - sbt -jvm-opts travis/jvmopts.compile ... compile
     - stage: test
       script: 
       - sbt test
