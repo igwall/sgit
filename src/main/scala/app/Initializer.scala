@@ -12,14 +12,20 @@ import scala.annotation.tailrec
 */
 
 class Initializer() {
-    def initialise : Unit = {
+
+    /**
+     * initialise:
+     * Method that return true if it could create a .sgit folder
+     * Create a .sgit folder with all sub folders and files necessary to use sgit
+     */
+
+    def initialise : Boolean = {
         
         val path = Paths.get("").toAbsolutePath().toString()
         val folders = List("tags", "commits", "trees", "blobs", "branches")
         val files = List("STAGE","HEAD")
         val sgitRepo = new File(".sgit")
         val sgitPath = path + File.separator +  ".sgit" 
-        println(sgitPath)
 
         // TO DO : Check if we're not already in a sgit project
         if(!alreadyExistSgitFolder(path)) {
@@ -27,10 +33,11 @@ class Initializer() {
             folders.map( folder => new File(sgitPath + File.separator +  folder).mkdir())
             files.map(file => new File(sgitPath + File.separator + file).createNewFile())
             println("Success: sgit project correctly initialized ! ")
+            return true
         } else {
             println("Fail: .sgit folder already existing... Abort")
+            return false
         }
-        
     }
 
 

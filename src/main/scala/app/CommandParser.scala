@@ -14,6 +14,7 @@ case class CommandParser (params : Array[String]) {
         }
         case "add" => println("On va te mettre bien")
         case _ => println("Unknow command prompted...")
+        
     }
 
 }
