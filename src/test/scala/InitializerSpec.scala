@@ -2,11 +2,18 @@ package example
 import java.io.File
 import java.nio.file.Paths
 import org.scalatest._
-import app.Initializer
+import app.command.Initializer
+import app.components.FileManager
 
 class InitializerSpec extends FlatSpec with Matchers {
 
-
+  override def withFixture(test: NoArgTest) = {
+    try test()
+    finally {
+      if (new File("../.sgit").exists()) FileManager.delete("../.sgit")
+      if (new File(".sgit").exists()) FileManager.delete(".sgit")
+    }
+  }
 
   "The initializer" should "create a .sgit folder with folders" in {
     val initializer = new Initializer()
@@ -17,14 +24,5 @@ class InitializerSpec extends FlatSpec with Matchers {
     val initializer = new Initializer()
     initializer.initialise
     assert(!initializer.initialise)
-  }
-
-  it should "Find the .sgit folder in path: " + Paths.get("").toAbsolutePath().toString() in {
-    val path = Paths.get("").toAbsolutePath().toString()
-    val sgitPath = path + File.separator + ".sgit"
-    val sgitFile = new File(sgitPath).exists
-    new File(sgitPath).delete()
-    assert(sgitFile)
-    
   }
 }
