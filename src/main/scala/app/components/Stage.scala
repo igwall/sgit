@@ -10,7 +10,7 @@ object Stage {
             val contentStage = FileManager.extractContentFromPath(stagePath)
             //If our path in already in stage, we only update blob hash
             if(isInStage(path, stagePath)){
-                val newContent = updateHash(hash,path)
+                val newContent = updateHash(hash,path, stagePath)
                 writeInStage(stagePath,newContent,sgitDirectory)
                 Some("File correctly added")
             } else {
@@ -33,14 +33,14 @@ object Stage {
     // Function that take a path in argument and a hash.
     // Check if the hash is the same for the path given in parameter.
     // If it is, replace the hash, else do nothing
-    def updateHash(hash : String, path : String): String ={
+    def updateHash(hash : String, path : String, stagePath : String): String ={
         //We check that the path is correctly staged before editing it
-        val contentOfStage = FileManager.extractContentFromPath(path)
-        val contentSplittedByLine =contentOfStage.split("\n") // => Splitted by line
+        val contentOfStage = FileManager.extractContentFromPath(stagePath)
+        contentOfStage
+          .split("\n") // => Splitted by line
+          .filter( line => !line.contains(path)) // => get all path expect the one that we want to edit
+          .mkString("\n") + s"$hash :: $path \n" // => add the new hash with the path to stage
 
-        //TODO: How to split my line in hash => value ??
-        val contentWithoutLine = contentSplittedByLine.filter( line => !line.contains(path))
-        contentWithoutLine.mkString("\n") + s"$hash :: $path \n"
     }
 
     def writeInStage(stagePath : String, contentStage : String, sgitDirectory : String): Unit ={
