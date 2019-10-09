@@ -3,12 +3,32 @@ import app.components.FileManager
 import java.io.File
 
 
-// Faire un singleton ? => Eviter de faire plusieurs calculs de path inutiles => Limiter I/O
-class Sgit(){
+object Sgit{
     //Return the path of the .sgit project
-    def getPath() : Option[String] =  {
+    def getRepoPath() : Option[String] =  {
         val path : File = new File(".")
         val canonical  = path.getCanonicalFile()
-        return FileManager.searchFolder(canonical, "./sgit")
+        val returnedFolder =  FileManager.searchFolder(canonical, ".sgit/")
+        if(returnedFolder.isDefined){
+            val mayParentFolder = returnedFolder.get.getParentFile
+            if(mayParentFolder.exists()){
+                return Some(mayParentFolder.toString)
+            } else {
+                None
+            }
+        } else {
+            None
+        }
+    }
+
+    def getSgitPath() : Option[String] = {
+        val path : File = new File(".")
+        val canonical  = path.getCanonicalFile()
+        val folderPath = FileManager.searchFolder(canonical, ".sgit/")
+        if(folderPath.isDefined){
+            return Some(folderPath.get.toString)
+        } else {
+            return None
+        }
     }
 }

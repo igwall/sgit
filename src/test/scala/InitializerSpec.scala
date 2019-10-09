@@ -7,13 +7,13 @@ import app.components.FileManager
 
 class InitializerSpec extends FlatSpec with Matchers {
 
-  override def withFixture(test: NoArgTest) = {
-    try test()
-    finally {
-      if (new File("../.sgit").exists()) FileManager.delete("../.sgit")
-      if (new File(".sgit").exists()) FileManager.delete(".sgit")
-    }
-  }
+  //override def withFixture(test: NoArgTest) = {
+  //  try test()
+  //  finally {
+  //    if (new File("../.sgit").exists()) FileManager.delete("../.sgit")
+  //    if (new File(".sgit").exists()) FileManager.delete(".sgit")
+  //  }
+  // }
 
   "The initializer" should "create a .sgit folder with folders" in {
     val initializer = new Initializer()

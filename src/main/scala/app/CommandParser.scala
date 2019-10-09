@@ -10,20 +10,34 @@ import app.components.Sgit
  */
 case class CommandParser (params : Array[String]) {
 
-    val sgitManager = new Sgit()
-    val optionPath : Option[String] = sgitManager.getPath()
-    val path = optionPath.get
-   
 
-    def treatment ()  = params(0) match   {
+    def parse(): Unit = {
+        val optionPath : Option[String] = Sgit.getRepoPath()
+        val optionDirectory : Option[String] = Sgit.getSgitPath()
+        if(optionPath.isDefined && optionDirectory.isDefined){
+            val workingDirectory : String = optionPath.get
+            val sgitDirectory: String = optionDirectory.get
+            treatment(workingDirectory, sgitDirectory)
+        } else {
+            println("An error occured. You're not in a working directory.")
+        }
+    }
+
+
+
+
+    def treatment (workingDirectory : String, sgitDirectory : String)  = params(0) match   {
 
         case "init" => {
             val initializer = new Initializer()
             initializer.initialise
         }
         case "add" => {
-            val add = new AddCommand(params(1), path)
-            add.addToStage()
+            val add = new AddCommand(params(1), workingDirectory,sgitDirectory)
+            val status = add.addToStage()
+            if(!status.isDefined){
+                println("Error: Cannot add this file to repository")
+            }
         }
         case _ => println("Unknow command prompted...")
         

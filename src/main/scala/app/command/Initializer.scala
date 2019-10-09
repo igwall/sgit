@@ -32,10 +32,10 @@ class Initializer() {
             sgitRepo.mkdir()
             folders.map( folder => new File(sgitPath + File.separator +  folder).mkdir())
             files.map(file => new File(sgitPath + File.separator + file).createNewFile())
-            println("Success: sgit project correctly initialized ! ")
+            println("Initialized empty Git repository in "+ path)
             return true
         } else {
-            println("Fail: .sgit folder already existing... Abort")
+            println("Error: already existing directory: .sgit")
             return false
         }
     }
