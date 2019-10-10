@@ -11,12 +11,11 @@ import app.components.Sgit
 case class CommandParser (params : Array[String]) {
 
     def treatment ()  = params(0) match   {
-
-        case "init" => {
+        case "init" =>
             val initializer = new Initializer()
             initializer.initialise
-        }
-        case "add" => {
+        case "add" =>
+            println(params)
             val optionPath : Option[String] = Sgit.getRepoPath()
             val optionDirectory : Option[String] = Sgit.getSgitPath()
             if(optionPath.isDefined && optionDirectory.isDefined){
@@ -24,13 +23,12 @@ case class CommandParser (params : Array[String]) {
                 val sgitDirectory: String = optionDirectory.get
                 val add = new AddCommand(params(1), workingDirectory,sgitDirectory)
                 val status = add.addToStage()
-                if(!status.isDefined){
+                if(status.isEmpty){
                     println("Error: Cannot add this file to repository")
                 }
             } else {
                 println("Error : You're not in sgit project.")
             }
-        }
         case _ => println("Unknow command prompted...")
         
     }
