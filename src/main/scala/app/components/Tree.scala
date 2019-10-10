@@ -20,7 +20,7 @@ object Tree {
       }
     }
     // Get all the trees
-    new Tree(fileName, subTrees,blobs.flatten)
+    new Tree(fileName, createTree(subTrees),blobs.flatten)
   }
 
 //TODO
