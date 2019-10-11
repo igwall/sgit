@@ -1,7 +1,7 @@
 package app.components
 import app.components.Sgit
 import java.io.File
-import java.security.MessageDigest
+
 
 object Blobs {
     //Path : String or Paths ?
@@ -12,7 +12,7 @@ object Blobs {
         println(s"fileToBlob : $fileToBlob, existing : ${new File(fileToBlob).exists()}")
         if(new File(fileToBlob).exists()){
             val contentFile : String = FileManager.extractContentFromPath(fileToBlob)
-            val hashFileName :String = createHash(contentFile)
+            val hashFileName :String = FileManager.createHash(contentFile)
             val blobDirectory  = sgitDirectory + File.separator + "blobs"
             // Nomme le fichier avec le hash
             FileManager.createFile(hashFileName, contentFile, blobDirectory )
@@ -25,14 +25,4 @@ object Blobs {
         
         
     }
-
-    def createHash(content : String) : String  = {
-        MessageDigest
-      .getInstance("SHA-1")
-      .digest(content.getBytes("UTF-8"))
-      .map("%02x".format(_))
-      .mkString
-
-    }
-
 }

@@ -11,7 +11,7 @@ class AddCommand(val fileToAddPath : String = "", val workingDirectory : String,
             val blobHash : Option[String] = Blobs.createBlob(fileToAddPath, sgitDirectory)
             //If the blob is correctly created
             if(blobHash.isDefined){
-                Stage.addElement(blobHash.get, fileToAddPath,sgitDirectory)
+                Stage.addElement(blobHash.get, fileToAddPath,sgitDirectory,workingDirectory)
                 return Some("OK")
             } else{
                 return None
