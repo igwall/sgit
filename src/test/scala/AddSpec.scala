@@ -1,14 +1,22 @@
 import app.command.AddCommand
 import org.scalatest._
-import app.command.AddCommand
 import java.io.File
 import app.components.Blobs
 import app.components.Sgit
 import app.command.Initializer
+import app.components.FileManager
 
 
 class AddSpec extends FlatSpec with Matchers {
 
+  override def withFixture(test: NoArgTest) = {
+    try test()
+    finally {
+      if (new File("/.sgit").exists()) FileManager.delete("/.sgit")
+    }
+  }
+  val initializer = new Initializer()
+  initializer.initialise
     val optionWorkingDirectory : Option[String] = Sgit.getRepoPath()
     val optionSgitDirectory : Option[String] = Sgit.getSgitPath()
     if(optionSgitDirectory.isDefined && optionWorkingDirectory.isDefined){
@@ -23,7 +31,8 @@ class AddSpec extends FlatSpec with Matchers {
       it should "create a blob from the path given in parameter: " in {
         val init = new Initializer()
         init.initialise
-        val hashedValue = Blobs.createBlob("/Users/lucasgoncalves/Git/sgit/src/test/testEnvironment/file1.txt",sgitDirectory)
+        val repoDirectory = Sgit.getRepoPath().get
+        val hashedValue = Blobs.createBlob(s"$repoDirectory/src/test/testEnvironment/file1.txt",sgitDirectory)
         assert(hashedValue.isDefined)
         assert(new File(s"$sgitDirectory/blobs/"+hashedValue.get).exists)
       }

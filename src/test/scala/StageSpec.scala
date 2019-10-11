@@ -1,4 +1,3 @@
-import app.command.AddCommand
 import org.scalatest._
 import app.components.Stage
 import java.io.File
@@ -9,19 +8,25 @@ import app.components.Blobs
 
 class StageSpec extends FlatSpec with Matchers {
 
+  override def withFixture(test: NoArgTest) = {
+    try test()
+    finally {
+      if (new File("/.sgit").exists()) FileManager.delete("/.sgit")
+    }
+  }
+  val initializer = new Initializer()
+  initializer.initialise
+
   "Stage" should "add line into itself" in {
     val init = new Initializer()
     init.initialise
     val sgitFolder = Sgit.getSgitPath().get
     val repoFolder = Sgit.getRepoPath().get
-    println(s"Repo folder = $repoFolder")
-    println(s".sgit path = $sgitFolder")
     val blob = Blobs.createBlob(
       s"$repoFolder/src/test/testEnvironment/file1.txt",
       sgitFolder
     )
     if (blob.isDefined) {
-      println(blob.get)
       Stage.addElement(
         blob.get,
         s"$repoFolder/src/test/testEnvironment/file1.txt",
@@ -40,8 +45,6 @@ class StageSpec extends FlatSpec with Matchers {
     init.initialise
     val sgitFolder = Sgit.getSgitPath().get
     val repoFolder = Sgit.getRepoPath().get
-    println(s"Repo folder = $repoFolder")
-    println(s".sgit path = $sgitFolder")
     FileManager.delete(
       s"$repoFolder/src/test/testEnvironment/file1.txt"
     )
@@ -55,7 +58,6 @@ class StageSpec extends FlatSpec with Matchers {
       sgitFolder
     )
     if (blob.isDefined) {
-      println(blob.get)
       Stage.addElement(
         blob.get,
         s"$repoFolder/src/test/testEnvironment/file1.txt",

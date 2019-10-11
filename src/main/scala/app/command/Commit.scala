@@ -32,9 +32,6 @@ object Commit {
   def transformPathLine(line: Array[String]): List[String] = {
     val pathSplitted = line(1).split("/").toList
     val cleanedPathSplitted = pathSplitted.filter(path => path.size > 0)
-    println(s"cleanedPathSplitted : $cleanedPathSplitted")
-    println((cleanedPathSplitted.dropRight(1) :+ line(0)).toString())
-    println((cleanedPathSplitted.head.size))
     cleanedPathSplitted.dropRight(1) :+ line(0) //We replace the name of the file with is hash
   }
 
@@ -50,7 +47,7 @@ object Commit {
 
     //Save informations about commit in /commits
     val content =
-      s"oldCommit : $olderCommit\ntrees: $tree}\nmessage: $message"
+      s"oldCommit : $olderCommit\ntrees: $tree\nmessage: $message"
     val path = sgitDirectory + "/commits"
     FileManager.createFile(hash, content, path)
   }

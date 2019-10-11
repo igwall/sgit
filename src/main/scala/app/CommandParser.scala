@@ -35,10 +35,14 @@ case class CommandParser(params: Array[String]) {
       if (optionPath.isDefined && optionDirectory.isDefined) {
         val sgitDirectory: String = optionDirectory.get
         //If the user give a message
-        if (params(1) == "-m") {
-          Commit.create(sgitDirectory, params(2))
+        if(params.length == 3){
+          if (params(1) == "-m") {
+            Commit.create(sgitDirectory, params(2))
+          } else {
+            Commit.create(sgitDirectory, "")
+          }
         } else {
-          Commit.create(sgitDirectory, "")
+          println("You don't give all informations")
         }
 
       } else {
