@@ -6,7 +6,7 @@ import app.components.FileManager
 
 object Commit {
 
-  def create(sgitDirectory: String, message: String): Unit = {
+  def create(sgitDirectory: String, message: String): String = {
     //Prepare all the trees to save
     val stageLines = Stage.readStage(sgitDirectory).split("\n").toList
     val contentToSave = prepareContent(stageLines)
@@ -18,6 +18,7 @@ object Commit {
     val hash =
       FileManager.createHash(name + contentToSave.mkString + sgitDirectory)
     save(hash, olderCommit, tree.hash, message, sgitDirectory)
+    hash
   }
 
   def prepareContent(listOfStageLines: List[String]): List[List[String]] = {

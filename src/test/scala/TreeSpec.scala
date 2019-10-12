@@ -1,18 +1,8 @@
-import java.io.File
-import app.command.Initializer
 import org.scalatest._
 import app.components.{FileManager, Sgit, Tree}
 
 class TreeSpec extends FlatSpec with Matchers {
 
-  override def withFixture(test: NoArgTest) = {
-    try test()
-    finally {
-      if (new File("/.sgit").exists()) FileManager.delete("/.sgit")
-    }
-  }
-  val initializer = new Initializer()
-  initializer.initialise
   "Tree" should "create correct architecture" in {
     val pathListed1 = List("b", "fin")
     val pathListed2 = List("b", "c", "fin")
@@ -24,13 +14,15 @@ class TreeSpec extends FlatSpec with Matchers {
     val mapped = listOfPath.partition(_.length > 1)
     val trees = mapped._1.groupBy(elem => elem.head)
     val blobs = mapped._2
+    val treeName = "origin"
 
     val sgitDirectory = Sgit.getSgitPath()
     if (sgitDirectory.isDefined) {
-      val tree = Tree.createTree("origin", listOfPath, sgitDirectory.get)
-      
+      val tree = Tree.createTree(treeName, listOfPath, sgitDirectory.get)
+      val pathOfTree = s"${sgitDirectory.get}/trees/${tree.hash}"
+      println(pathOfTree)
+      assert(FileManager.exist(pathOfTree))
     }
-
   }
 
 }

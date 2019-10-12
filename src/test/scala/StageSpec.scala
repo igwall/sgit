@@ -8,14 +8,6 @@ import app.components.Blobs
 
 class StageSpec extends FlatSpec with Matchers {
 
-  override def withFixture(test: NoArgTest) = {
-    try test()
-    finally {
-      if (new File("/.sgit").exists()) FileManager.delete("/.sgit")
-    }
-  }
-  val initializer = new Initializer()
-  initializer.initialise
 
   "Stage" should "add line into itself" in {
     val init = new Initializer()
@@ -71,10 +63,10 @@ class StageSpec extends FlatSpec with Matchers {
     }
   }
 
-    it should "clean the path" in {
-      val repoFolder = Sgit.getRepoPath().get
-      val path = s"$repoFolder/5/6/monfichier.txt"
-      val cleanedPath = Stage.cleanPath(path, repoFolder)
-      assert(cleanedPath == "/5/6/monfichier.txt")
-    }
+  it should "clean the path" in {
+    val repoFolder = Sgit.getRepoPath().get
+    val path = s"$repoFolder/5/6/monfichier.txt"
+    val cleanedPath = Stage.cleanPath(path, repoFolder)
+    assert(cleanedPath == "/5/6/monfichier.txt")
   }
+}

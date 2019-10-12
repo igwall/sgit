@@ -12,7 +12,8 @@ class AddSpec extends FlatSpec with Matchers {
   override def withFixture(test: NoArgTest) = {
     try test()
     finally {
-      if (new File("/.sgit").exists()) FileManager.delete("/.sgit")
+      val repo = Sgit.getRepoPath().get
+      if (new File("/.sgit").exists()) FileManager.delete(s"$repo/.sgit")
     }
   }
   val initializer = new Initializer()
