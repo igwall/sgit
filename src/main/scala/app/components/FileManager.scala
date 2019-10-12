@@ -19,6 +19,10 @@ object FileManager {
     }
   }
 
+  def update(fileName: String, content: String, path: String) = {
+    if (exist(path)) delete(fileName) else createFile(fileName, content, path)
+  }
+
   def extractContentFromPath(path: String) = {
     scala.io.Source.fromFile(path).mkString
   }
@@ -44,10 +48,50 @@ object FileManager {
       .digest(content.getBytes("UTF-8"))
       .map("%02x".format(_))
       .mkString
-
   }
 
   def exist(path: String): Boolean = {
     return new File(path).exists
   }
+
+  def cleanPath(path: String, pathToSubstain: String): String = {
+    path drop pathToSubstain.size
+  }
+
+  def isDirectory(path: String): Boolean = {
+    val isDirectory = new File(path).isDirectory
+    isDirectory
+  }
+
+  def getAllFilesFromPath(
+      workingDirectory: String,
+      origin: String
+  ): List[String] = {
+    // We get all the files and directory from repo
+    val allFiles = new File(workingDirectory).listFiles().toList
+    // WE need to separate files and folder
+
+    val sortedFilesFolders = allFiles.partition(file => !file.isDirectory())
+    // Add all the files to a list of path
+    // WARNING -!!!! Si j'ai pas de fichiers
+    val pathOfFiles = sortedFilesFolders._1.map(
+      file =>
+        cleanPath(file.getCanonicalPath(), origin) // Clean all the path of files according working directory :)
+    )
+
+    val pathOfSubFolders = sortedFilesFolders._2
+    if (pathOfSubFolders.isEmpty) {
+      pathOfFiles.map(path => cleanPath(path, origin))
+      pathOfFiles
+    } else {
+      val subFiles = pathOfSubFolders.map(
+        folder => getAllFilesFromPath(folder.getPath(), origin)
+      )
+      // return the list of files in this folder and all the path from subdirectory files
+      pathOfFiles ::: subFiles.flatten
+    }
+
+    // Reccursively get all the files from subfolders
+  }
+
 }

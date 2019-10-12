@@ -20,7 +20,6 @@ class TreeSpec extends FlatSpec with Matchers {
     if (sgitDirectory.isDefined) {
       val tree = Tree.createTree(treeName, listOfPath, sgitDirectory.get)
       val pathOfTree = s"${sgitDirectory.get}/trees/${tree.hash}"
-      println(pathOfTree)
       assert(FileManager.exist(pathOfTree))
     }
   }

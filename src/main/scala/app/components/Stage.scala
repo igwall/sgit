@@ -2,6 +2,7 @@ package app.components
 import java.io.File
 object Stage {
   // If the path is not written, add it to file
+  val separator = "::"
   // Else, update the content
   def addElement(
       hash: String,
@@ -20,7 +21,7 @@ object Stage {
         writeInStage(stagePath, newContent, sgitDirectory)
         Some("File correctly added")
       } else {
-        val newContent = contentStage + s"$hash :: $cleanedPath \n"
+        val newContent = contentStage + s"$hash ${Stage.separator} $cleanedPath \n"
         writeInStage(stagePath, newContent, sgitDirectory)
         Some("File correctly added")
       }
@@ -45,7 +46,7 @@ object Stage {
     contentOfStage
       .split("\n") // => Splitted by line
       .filter(line => !line.contains(path)) // => get all path expect the one that we want to edit
-      .mkString("\n") + s"$hash :: $path \n" // => add the new hash with the path to stage
+      .mkString("\n") + s"$hash ${Stage.separator} $path \n" // => add the new hash with the path to stage
   }
 
   def writeInStage(
@@ -62,10 +63,52 @@ object Stage {
   }
 
   def getPath(sgitDirectory: String): String = {
-    s"${sgitDirectory}+/STAGE"
+    s"${sgitDirectory}/STAGE"
   }
 
   def cleanPath(path: String, projectDirectory: String): String = {
     path drop projectDirectory.size
+  }
+
+  def getContent(sgitDirectory: String): String = {
+    FileManager
+      .extractContentFromPath(Stage.getPath(sgitDirectory))
+  }
+
+  def contains(path: String, sgitDirectory: String): Boolean = {
+    val content = getContent(sgitDirectory)
+    content.contains(path)
+  }
+
+  def backup(sgitDirectory: String) {
+    val path = s"$sgitDirectory/.old/STAGE.old"
+    if (FileManager.exist(path)) {
+      FileManager.delete(path)
+    }
+    FileManager.createFile(
+      "STAGE.old",
+      Stage.getContent(sgitDirectory),
+      s"$sgitDirectory/.old/"
+    )
+  }
+
+  def getOldStage(sgitDirectory: String): String = {
+    FileManager.extractContentFromPath(s"$sgitDirectory/.old/STAGE.old")
+  }
+
+  def getAllPath(sgitDirectory: String): List[String] = {
+    Stage
+      .readStage(sgitDirectory)
+      .split("\n")
+      .toList
+      .flatMap(
+        _.split("::").toList
+          .filter(_.contains("/"))
+      )
+  }
+
+  def getMappingHash(sgitDirectory: String) = {
+    val stage = Stage.getContent(sgitDirectory)
+    val stageSplitted = stage.split("\n")
   }
 }

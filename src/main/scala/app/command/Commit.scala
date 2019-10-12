@@ -8,7 +8,9 @@ object Commit {
 
   def create(sgitDirectory: String, message: String): String = {
     //Prepare all the trees to save
-    val stageLines = Stage.readStage(sgitDirectory).split("\n").toList
+    val stageContent = Stage.readStage(sgitDirectory)
+    Stage.backup(sgitDirectory)
+    val stageLines = stageContent.split("\n").toList
     val contentToSave = prepareContent(stageLines)
 
     //Data about commit
@@ -25,7 +27,7 @@ object Commit {
     //On doit mettre le path.split + hash
     val separedBlobAndPath =
       listOfStageLines
-        .map(elem => transformPathLine(elem.split(" :: ")))
+        .map(elem => transformPathLine(elem.split(s" ${Stage.separator} ")))
         .toList
     separedBlobAndPath
   }

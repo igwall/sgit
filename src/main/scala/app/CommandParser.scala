@@ -35,7 +35,7 @@ case class CommandParser(params: Array[String]) {
       if (optionPath.isDefined && optionDirectory.isDefined) {
         val sgitDirectory: String = optionDirectory.get
         //If the user give a message
-        if(params.length == 3){
+        if (params.length == 3) {
           if (params(1) == "-m") {
             Commit.create(sgitDirectory, params(2))
           } else {
@@ -45,6 +45,18 @@ case class CommandParser(params: Array[String]) {
           println("You don't give all informations")
         }
 
+      } else {
+        println("Error: It seems that your not in working directory")
+      }
+
+    case "status" =>
+      val optionPath: Option[String] = Sgit.getRepoPath()
+      val optionDirectory: Option[String] = Sgit.getSgitPath()
+      if (optionPath.isDefined && optionDirectory.isDefined) {
+        val sgitDirectory: String = optionDirectory.get
+        val repoDirectory: String = optionPath.get
+        val message = Status.getStatus(sgitDirectory, repoDirectory)
+        println(message)
       } else {
         println("Error: It seems that your not in working directory")
       }

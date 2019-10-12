@@ -1,1 +1,0 @@
-This folder is made to create a complete test environment with specific files used in test. 
