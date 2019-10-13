@@ -1,21 +1,35 @@
 #sgit project
 
 #### Upgrades in progress : 
-- [DONE] Init
--  [WIP] Parser => Always updated with new command :) 
--  [DONE ] Add
-- ...
+- ✅ Init
+- 🕓 Parser => Always updated with new command :) 
+- ✅ Add
+- ✅ Commit
+- ✅ Status
+- 🕓 Diff
+- ...
 
 
 
 #### Resume :
 This project is a clone of git, a code versioning tool (and more generally a file versioning tool) made during the month of October 2019. 
 
-#### Installation :
+#### Installation (manual) :
+> THis Scala project use Assembly so please make sure that you've installed `sbt` before using it.
 
 - 1. Project setup : 
-`git clone https://github.com/igwall/sgit.git`
-`cd sgit/`
+
+1. `git clone https://github.com/igwall/sgit.git`
+2. `cd sgit/`
+3. `sbt assembly`
+4. Open your .bashrc or .zshrc and add this content at the end of file : 
+```bash
+    export PATH="/Users/lucasgoncalves/Git/sgit/target/scala-2.13/:$PATH"
+    alias sgit="sgit-0.1.0-SNAPSHOT"
+```
+5. Refresh your bash file : `source .zshrc` or `source .bashrc`
+6. Enjoy the wonderfull **sgit** command 💪🏻
+
 
 - 2. Use it with path:
 > To complete

@@ -36,7 +36,7 @@ class Initializer() {
       val oldStage = new File(
         sgitPath + File.separator + ".old" + File.separator + "STAGE.old"
       ).createNewFile()
-      println("Initialized empty Git repository in " + path)
+      println("Initialized empty .sgit repository in " + path)
       return true
     } else {
       println("Error: already existing directory: .sgit")
