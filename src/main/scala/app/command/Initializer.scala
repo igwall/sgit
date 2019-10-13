@@ -33,7 +33,7 @@ class Initializer() {
       files.map(
         file => new File(sgitPath + File.separator + file).createNewFile()
       )
-      val oldStage = new File(
+      new File(
         sgitPath + File.separator + ".old" + File.separator + "STAGE.old"
       ).createNewFile()
       println("Initialized empty .sgit repository in " + path)

@@ -1,4 +1,4 @@
-#sgit project
+# sgit project
 
 #### Upgrades in progress : 
 - ✅ Init
@@ -15,9 +15,8 @@
 This project is a clone of git, a code versioning tool (and more generally a file versioning tool) made during the month of October 2019. 
 
 #### Installation (manual) :
-> THis Scala project use Assembly so please make sure that you've installed `sbt` before using it.
+> This Scala project use Assembly so please make sure that you've installed `sbt` before using it.
 
-- 1. Project setup : 
 
 1. `git clone https://github.com/igwall/sgit.git`
 2. `cd sgit/`
@@ -31,8 +30,6 @@ This project is a clone of git, a code versioning tool (and more generally a fil
 6. Enjoy the wonderfull **sgit** command 💪🏻
 
 
-- 2. Use it with path:
-> To complete
 
 #### Documentation: 
 
