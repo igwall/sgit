@@ -20,11 +20,20 @@ object FileManager {
   }
 
   def update(fileName: String, content: String, path: String) = {
-    if (exist(path)) delete(fileName) else createFile(fileName, content, path)
+    if (exist(path)) {
+      delete(fileName)
+      createFile(fileName, content, path) 
+    } else {
+      createFile(fileName, content, path) 
+    } 
   }
 
   def extractContentFromPath(path: String) = {
-    scala.io.Source.fromFile(path).mkString
+    val reader = Source.fromFile(path)
+    val content = reader.mkString
+    reader.close()
+    content
+
   }
 
   def createFile(name: String, data: String, path: String): Unit = {
@@ -82,13 +91,13 @@ object FileManager {
     val pathOfSubFolders = sortedFilesFolders._2
     if (pathOfSubFolders.isEmpty) {
       pathOfFiles.map(path => cleanPath(path, origin))
-      pathOfFiles
+      pathOfFiles.filter(!_.contains("/.sgit/"))
     } else {
       val subFiles = pathOfSubFolders.map(
         folder => getAllFilesFromPath(folder.getPath(), origin)
       )
       // return the list of files in this folder and all the path from subdirectory files
-      pathOfFiles ::: subFiles.flatten
+      pathOfFiles ::: subFiles.flatten.filter(!_.contains("/.sgit/"))
     }
 
     // Reccursively get all the files from subfolders

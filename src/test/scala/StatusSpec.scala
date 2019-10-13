@@ -2,6 +2,7 @@ import org.scalatest._
 import app.components.Sgit
 import app.components.FileManager
 import app.command.Status
+import app.command.AddCommand
 
 class Status extends FlatSpec with Matchers {
 
@@ -14,6 +15,14 @@ class Status extends FlatSpec with Matchers {
     )
     assert(!files.isEmpty())
   }
+
+  it should "find all the files added between two commits" in {
+    val sgitDirectory = Sgit.getSgitPath().get
+    val workingDirectory = Sgit.getRepoPath().get
+
+    //val add = new AddCommand()
+  }
+  /*
   it should "find an updated file" in {
     val workingDirectory = Sgit.getRepoPath().get
     val sgitDirectory = Sgit.getSgitPath().get
@@ -26,5 +35,6 @@ class Status extends FlatSpec with Matchers {
       !Status.getFilesStagedButEdited(sgitDirectory, workingDirectory).isEmpty
     )
   }
+ */
 
 }

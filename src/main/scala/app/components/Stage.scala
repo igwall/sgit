@@ -10,18 +10,18 @@ object Stage {
       sgitDirectory: String,
       repoDirectory: String
   ): Option[String] = {
+    val fullPath = repoDirectory + path
     val stagePath = sgitDirectory + File.separator + "/STAGE"
     //Check that the STAGE file is at the good place
     if (FileManager.exist(stagePath)) {
-      val cleanedPath = cleanPath(path, repoDirectory)
       val contentStage = FileManager.extractContentFromPath(stagePath)
       //If our path in already in stage, we only update blob hash
-      if (isInStage(cleanedPath, stagePath)) {
-        val newContent = updateHash(hash, cleanedPath, stagePath)
+      if (isInStage(path, stagePath)) {
+        val newContent = updateHash(hash, path, stagePath)
         writeInStage(stagePath, newContent, sgitDirectory)
         Some("File correctly added")
       } else {
-        val newContent = contentStage + s"$hash ${Stage.separator} $cleanedPath \n"
+        val newContent = contentStage + s"$hash ${Stage.separator} $path\n"
         writeInStage(stagePath, newContent, sgitDirectory)
         Some("File correctly added")
       }
@@ -45,8 +45,9 @@ object Stage {
     val contentOfStage = FileManager.extractContentFromPath(stagePath)
     contentOfStage
       .split("\n") // => Splitted by line
-      .filter(line => !line.contains(path)) // => get all path expect the one that we want to edit
-      .mkString("\n") + s"$hash ${Stage.separator} $path \n" // => add the new hash with the path to stage
+      .filter(line => !line.contains(path))
+      .map(line => line + "\n") // => get all path expect the one that we want to edit
+      .mkString + s"$hash ${Stage.separator} $path\n" // => add the new hash with the path to stage
   }
 
   def writeInStage(
@@ -102,7 +103,7 @@ object Stage {
       .split("\n")
       .toList
       .flatMap(
-        _.split("::").toList
+        _.split(s" ${Stage.separator} ").toList
           .filter(_.contains("/"))
       )
   }

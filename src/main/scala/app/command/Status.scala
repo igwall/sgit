@@ -8,12 +8,11 @@ object Status {
     val untrackedFiles = getUntrackedFiles(sgitDirectory, workingDirectory)
     val filesStagedButEdited =
       getFilesStagedButEdited(sgitDirectory, workingDirectory)
-    s"""
-    Edited files :
+    s"""Edited files :
     $filesStagedButEdited
     
     New files : 
-    $changesToCommit\n
+    $changesToCommit
     
 
     Untracked files :\n
@@ -30,7 +29,7 @@ object Status {
       FileManager.getAllFilesFromPath(workingDirectory, workingDirectory)
     val stageContent = Stage.getContent(sgitDirectory)
     val res = allFiles.filter(file => !Stage.contains(file, sgitDirectory))
-    res.map(elem => s"- $elem \n").mkString
+    res.map(elem => s"-  $elem \n").mkString
   }
 
   // Get all the files that weren't in the previous commit but added now
@@ -39,11 +38,10 @@ object Status {
     val currentStage = Stage.getAllPath(sgitDirectory)
     val oldStagePath = Stage.getOldStage(sgitDirectory)
     val newFiles = currentStage.filter(path => !oldStagePath.contains(path))
-    val result = newFiles
+    newFiles
       .filter(path => path.size > 0)
       .map(path => s"-  $path\n")
       .mkString
-    result
   }
 
   // Get all the files that are in stage but their "optentially hash" is different from now
@@ -53,21 +51,20 @@ object Status {
   ): String = {
     val stage = Stage.getContent(sgitDirectory)
     val paths = Stage.getAllPath(sgitDirectory)
-    val tuples = paths.map(
-      path =>
-        (
-          path,
-          FileManager.createHash(
-            FileManager.extractContentFromPath(path)
-          )
+    val tuples = paths.map { path =>
+      (
+        path,
+        FileManager.createHash(
+          FileManager.extractContentFromPath(workingDirectory + path)
         )
-    )
+      )
+    }
     val filesEdited = tuples
       .filter(
-        elem => !stage.contains(s"${elem._1} $Stage.separator ${elem._2}")
+        elem => !stage.contains(s"${elem._2} ${Stage.separator} ${elem._1}")
       )
       .filter(elem => elem._1.size > 0)
-    filesEdited.map(elem => s"-  ${elem._1} \n").mkString
+    filesEdited.map(elem => s"-  ${elem._1}\n").mkString
   }
 
   // Return stage content

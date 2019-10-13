@@ -68,5 +68,17 @@ class StageSpec extends FlatSpec with Matchers {
     val cleanedPath = Stage.cleanPath(path, repoFolder)
     assert(cleanedPath == "/5/6/monfichier.txt")
   }
-  
+
+  it should "get all the paths" in {
+    val sgitFolder = Sgit.getSgitPath().get
+    val paths = Stage.getAllPath(sgitFolder)
+    assert(paths.size == 1)
+  }
+
+  it should "get the content from the old stage" in {
+    val sgitFolder = Sgit.getSgitPath().get
+    val paths = Stage.getOldStage(sgitFolder)
+    assert(!paths.isEmpty())
+  }
+
 }
