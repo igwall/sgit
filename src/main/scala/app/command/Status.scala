@@ -10,12 +10,9 @@ object Status {
       getFilesStagedButEdited(sgitDirectory, workingDirectory)
     s"""Edited files :
     $filesStagedButEdited
-    
-    New files : 
+    \rNew files : 
     $changesToCommit
-    
-
-    Untracked files :\n
+    \rUntracked files :\n
     $untrackedFiles
     """
   }
