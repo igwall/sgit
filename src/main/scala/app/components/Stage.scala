@@ -76,11 +76,24 @@ object Stage {
       .extractContentFromPath(Stage.getPath(sgitDirectory))
   }
 
+  def delete(sgitDirectory: String, path: String) {
+
+    val contentOfStage =
+      FileManager.extractContentFromPath(s"${sgitDirectory}/STAGE")
+    contentOfStage
+      .split("\n") // => Splitted by line
+      .filter(line => !line.contains(path))
+      .map(line => line + "\n") // => get all path expect the one that we want to edit
+      .mkString
+  }
+
+  // Check that the path given is in stage
   def contains(path: String, sgitDirectory: String): Boolean = {
     val content = getContent(sgitDirectory)
     content.contains(path)
   }
 
+  // Save the STAGE
   def backup(sgitDirectory: String) {
     val path = s"$sgitDirectory/.old/STAGE.old"
     if (FileManager.exist(path)) {
@@ -93,6 +106,7 @@ object Stage {
     )
   }
 
+  // Give the content of the ols Stage
   def getOldStage(sgitDirectory: String): String = {
     FileManager.extractContentFromPath(s"$sgitDirectory/.old/STAGE.old")
   }

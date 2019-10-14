@@ -8,12 +8,19 @@ object Status {
     val untrackedFiles = getUntrackedFiles(sgitDirectory, workingDirectory)
     val filesStagedButEdited =
       getFilesStagedButEdited(sgitDirectory, workingDirectory)
-    s"""Edited files :
-    $filesStagedButEdited
+    s"""
+    ${Console.YELLOW}
+    \rEdited files :
+      $filesStagedButEdited
+    ${Console.RESET}
+    ${Console.GREEN}
     \rNew files : 
     $changesToCommit
+    ${Console.RESET}
+    ${Console.RED}
     \rUntracked files :\n
     $untrackedFiles
+    ${Console.RESET}
     """
   }
 

@@ -23,10 +23,14 @@ case class CommandParser(params: Array[String]) {
         val add = new AddCommand(params(1), workingDirectory, sgitDirectory)
         val status = add.addToStage()
         if (status.isEmpty) {
-          println("Error: Cannot add this file to repository")
+          println(
+            "${Console.RED}Error: Cannot add this file to repository${Console.RESET}"
+          )
         }
       } else {
-        println("Error : You're not in sgit project.")
+        println(
+          s"${Console.RED}Error : You're not in sgit project.${Console.RESET}"
+        )
       }
 
     case "commit" =>
@@ -34,15 +38,14 @@ case class CommandParser(params: Array[String]) {
       val optionDirectory: Option[String] = Sgit.getSgitPath()
       if (optionPath.isDefined && optionDirectory.isDefined) {
         val sgitDirectory: String = optionDirectory.get
+        val repoDirectory = optionPath.get
         //If the user give a message
         if (params.length == 3) {
           if (params(1) == "-m") {
-            Commit.create(sgitDirectory, params(2))
-          } else {
-            Commit.create(sgitDirectory, "")
+            Commit.create(sgitDirectory, params(2), repoDirectory)
           }
         } else {
-          println("You don't give all informations")
+          Commit.create(sgitDirectory, " ", repoDirectory)
         }
 
       } else {

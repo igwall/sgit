@@ -36,7 +36,7 @@ class Initializer() {
       new File(
         sgitPath + File.separator + ".old" + File.separator + "STAGE.old"
       ).createNewFile()
-      println("Initialized empty .sgit repository in " + path)
+      println(s"${Console.GREEN}Initialized empty .sgit repository in $path ${Console.RESET}")
       return true
     } else {
       println("Error: already existing directory: .sgit")

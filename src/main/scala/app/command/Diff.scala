@@ -211,7 +211,7 @@ object Diff {
 
   def displayDiff(values: List[(String, String)]): String = {
     val edited = values.filter(p => p._1 != "")
-    edited.map(value => s"\r${value._1} ${value._2}\n").mkString
+    edited.map(value => s"\r${Console.GREEN}${value._1} ${value._2}\n").mkString
   }
 
 }
