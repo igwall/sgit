@@ -8,20 +8,20 @@ import app.components.FileManager
 
 object Diff {
   // Main method for the command
-  def getDiff(sgitDirectory: String, repoDirectory: String): List[String] = {
+  def getDiff(sgitDirectory: String, repoDirectory: String): String = {
 
     // Récupérer le stage
     val hashAndPath = Stage.getTuplesHashPath(sgitDirectory)
     hashAndPath.map { hashAndPath =>
-      s"""${hashAndPath._2}\n  
-      ${makeDiff(
+      s"""\r${hashAndPath._2}  
+          ${makeDiff(
         Blobs.getContent(hashAndPath._1, sgitDirectory).split("\n").toList,
         FileManager
           .extractContentFromShortenPath(hashAndPath._2, repoDirectory)
           .split("\n")
           .toList
-      )}"""
-    }
+      )}\n"""
+    }.mkString
     // Récupérer le path pour dire qu'on fait le diff la dessus : /src/xxx.txt et avec les diffs en deesous
     // Séparer les blobs des paths
     // Pour chaque Blob et chaque path (Dans un map)
