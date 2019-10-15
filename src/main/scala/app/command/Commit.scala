@@ -88,4 +88,11 @@ object Commit {
     FileManager.createFile(hash, content, path)
   }
 
+  def extractContentLastCommit(sgitDirectory: String): String = {
+    val commit = Head.getLastCommit(sgitDirectory)
+    FileManager.extractContentFromPath(s"$sgitDirectory/commits/$commit")
+  }
+
+  def extractContentFromCommit(sgitDirectory: String, hash: String): String = {}
+
 }
