@@ -2,7 +2,11 @@ package app.command
 import app.command.Initializer
 import app.command.AddCommand
 import app.components.Sgit
+<<<<<<< HEAD
 import app.components.Branch
+=======
+import app.command.Diff
+>>>>>>> diff
 
 /**
   * Class that parse arguments given in parameter and dispatch actions to the right behavior class.
@@ -64,23 +68,24 @@ case class CommandParser(params: Array[String]) {
       } else {
         println("Error: It seems that your not in sgit project")
       }
-
-    case "branch" =>
+    case "diff" =>
       val optionPath: Option[String] = Sgit.getRepoPath()
       val optionDirectory: Option[String] = Sgit.getSgitPath()
       if (optionPath.isDefined && optionDirectory.isDefined) {
         val sgitDirectory: String = optionDirectory.get
         val repoDirectory: String = optionPath.get
+        val message = Diff.getDiff(sgitDirectory, repoDirectory)
+        println(message)
+      } else {
+        println("Error: It seems that your not in working directory")
+      }
+    case "branch" =>
         val message = Branch.createBranch(params(1), sgitDirectory)
         if (message.isDefined) {
           println(message.get)
         } else {
           println("fatal: Not a valid object name: 'master'.")
         }
-      } else {
-        println("Error: It seems that your not in sgit project")
-      }
-
     case _ => println("Unknow command prompted...")
 
   }

@@ -1,5 +1,5 @@
 package app.components
-import app.components.Sgit
+import app.components.{Sgit,FileManager}
 import java.io.File
 
 object Blobs {
@@ -28,4 +28,10 @@ object Blobs {
     }
 
   }
+
+  def getContent(hash: String, sgitDirectory : String):String = {
+    val fullPath = s"$sgitDirectory/blobs/$hash"
+    FileManager.extractContentFromPath(fullPath)
+  }
+
 }

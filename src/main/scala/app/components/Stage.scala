@@ -1,5 +1,6 @@
 package app.components
 import java.io.File
+import scala.annotation.tailrec
 object Stage {
   // If the path is not written, add it to file
   val separator = "::"
@@ -122,8 +123,40 @@ object Stage {
       )
   }
 
-  def getMappingHash(sgitDirectory: String) = {
+  def getAllBlobs(sgitDirectory: String): List[String] = {
+    Stage
+      .readStage(sgitDirectory)
+      .split("\n")
+      .toList
+      .flatMap(
+        _.split(s" ${Stage.separator} ").toList
+          .filter(!_.contains("/"))
+      )
+  }
+
+  def getTuplesHashPath(sgitDirectory: String): List[(String, String)] = {
+    val blobs = Stage.getAllBlobs(sgitDirectory)
+    val paths = Stage.getAllPath(sgitDirectory)
+
+    @tailrec
+    def createTuple(
+        blobs: List[String],
+        paths: List[String],
+        res: List[(String, String)]
+    ): List[(String, String)] = {
+      if (blobs.tail.isEmpty || paths.isEmpty) {
+        res
+      } else {
+        val newRes = (blobs.head, paths.head) +: res
+        createTuple(blobs.tail, paths.tail, newRes)
+      }
+    }
+    createTuple(blobs, paths, List())
+  }
+
+  def getMappingHash(sgitDirectory: String): List[String] = {
     val stage = Stage.getContent(sgitDirectory)
-    val stageSplitted = stage.split("\n")
+    stage.split("\n").toList
+
   }
 }

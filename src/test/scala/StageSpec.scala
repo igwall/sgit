@@ -81,4 +81,9 @@ class StageSpec extends FlatSpec with Matchers {
     assert(!paths.isEmpty())
   }
 
+  it should "return a list of blob" in {
+    val sgitFolder = Sgit.getSgitPath().get
+    val blobs = Stage.getAllBlobs(sgitFolder)
+  }
+
 }
