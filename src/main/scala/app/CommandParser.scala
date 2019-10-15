@@ -2,6 +2,7 @@ package app.command
 import app.command.Initializer
 import app.command.AddCommand
 import app.components.Sgit
+import app.command.Diff
 
 /**
   * Class that parse arguments given in parameter and dispatch actions to the right behavior class.
@@ -59,6 +60,18 @@ case class CommandParser(params: Array[String]) {
         val sgitDirectory: String = optionDirectory.get
         val repoDirectory: String = optionPath.get
         val message = Status.getStatus(sgitDirectory, repoDirectory)
+        println(message)
+      } else {
+        println("Error: It seems that your not in working directory")
+      }
+
+    case "diff" =>
+      val optionPath: Option[String] = Sgit.getRepoPath()
+      val optionDirectory: Option[String] = Sgit.getSgitPath()
+      if (optionPath.isDefined && optionDirectory.isDefined) {
+        val sgitDirectory: String = optionDirectory.get
+        val repoDirectory: String = optionPath.get
+        val message = Diff.getDiff(sgitDirectory, repoDirectory)
         println(message)
       } else {
         println("Error: It seems that your not in working directory")

@@ -6,7 +6,7 @@
 - ✅ Add
 - ✅ Commit
 - ✅ Status
-- 🕓 Diff
+- ✅  Diff
 - ...
 
 
@@ -55,4 +55,7 @@ Use `sgit commit -m "An awesome message"` to commit all your added files.
 
 ##### status
 This command show the differents "states" of files in your repository. It show to you all the files that were already added but edited in "`Edited files`" section. It shows you all the files added between your last commit and all your "current add" in `New files`. Of course, it allow you to show all the file that never been tracked in `untracked files`
+
+##### diff
+This command show the differents between your current stage status (all the files added) and your current working directory. 
 

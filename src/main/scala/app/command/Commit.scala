@@ -1,39 +1,38 @@
 package app.command
-import app.components.Stage
-import app.components.Head
-import app.components.Tree
-import app.components.FileManager
+import app.components.{Stage, Head, Tree, FileManager}
+import app.command.Status
 
 object Commit {
 
   def create(
       sgitDirectory: String,
       message: String,
-      repoDirectory: String
+      workingDirectory: String
   ): String = {
-    //Prepare all the trees to save
-    val stageContent = Stage.readStage(sgitDirectory)
-    Stage.backup(sgitDirectory)
-    val stageLines = stageContent.split("\n").toList
-    val contentToSave = prepareContent(stageLines, repoDirectory, sgitDirectory)
+      //Prepare all the trees to save
+      val stageContent = Stage.readStage(sgitDirectory)
+      Stage.backup(sgitDirectory)
+      val stageLines = stageContent.split("\n").toList
+      val contentToSave =
+        prepareContent(stageLines, workingDirectory, sgitDirectory)
 
-    //Data about commit
-    val name = "/"
-    val olderCommit: String = Head.getLastCommit(sgitDirectory)
-    val tree = Tree.createTree(name, contentToSave, sgitDirectory)
-    val hash =
-      FileManager.createHash(name + contentToSave.mkString + sgitDirectory)
-    save(hash, olderCommit, tree.hash, message, sgitDirectory)
-    hash
+      //Data about commit
+      val name = "/"
+      val olderCommit: String = Head.getLastCommit(sgitDirectory)
+      val tree = Tree.createTree(name, contentToSave, sgitDirectory)
+      val hash =
+        FileManager.createHash(name + contentToSave.mkString + sgitDirectory)
+      save(hash, olderCommit, tree.hash, message, sgitDirectory)
+      hash
   }
 
   def prepareContent(
       listOfStageLines: List[String],
-      repoDirectory: String,
+      workingDirectory: String,
       sgitDirectory: String
   ): List[List[String]] = {
     //On doit mettre le path.split + hash
-    //val contentCleaned = deleteFilesCheck(listOfStageLines, repoDirectory, sgitDirectory)
+    //val contentCleaned = deleteFilesCheck(listOfStageLines, workingDirectory, sgitDirectory)
     listOfStageLines
       .map(elem => transformPathLine(elem.split(s" ${Stage.separator} ")))
       .toList
@@ -41,7 +40,7 @@ object Commit {
 
   def deleteFilesCheck(
       listOfStageLines: List[String],
-      repoDirectory: String,
+      workingDirectory: String,
       sgitDirectory: String
   ): List[String] = {
     val deleteBlankLine = listOfStageLines.filter(line => line != "")
