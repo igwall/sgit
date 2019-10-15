@@ -22,10 +22,10 @@ object FileManager {
   def update(fileName: String, content: String, path: String) = {
     if (exist(path)) {
       delete(fileName)
-      createFile(fileName, content, path) 
+      createFile(fileName, content, path)
     } else {
-      createFile(fileName, content, path) 
-    } 
+      createFile(fileName, content, path)
+    }
   }
 
   def extractContentFromPath(path: String) = {
@@ -36,11 +36,16 @@ object FileManager {
 
   }
 
-  def createFile(name: String, data: String, path: String): Unit = {
-    val file = new File(path + File.separator + name)
-    val bw = new BufferedWriter(new FileWriter(file))
-    bw.write(data)
-    bw.close()
+  def createFile(name: String, data: String, path: String): Option[String] = {
+    if (new File(path + File.separator + name).exists()) {
+      None
+    } else {
+      val file = new File(path + File.separator + name)
+      val bw = new BufferedWriter(new FileWriter(file))
+      bw.write(data)
+      bw.close()
+      Some("File correctly added")
+    }
   }
 
   def delete(path: String): Unit = {
