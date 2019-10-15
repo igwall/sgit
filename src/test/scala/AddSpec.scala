@@ -9,14 +9,16 @@ import app.components.FileManager
 class AddSpec extends FlatSpec with Matchers {
 
   override def withFixture(test: NoArgTest) = {
+    // avant le test
+    val init = new Initializer()
+    init.initialise
+    // Fait le test
     try test()
     finally {
       val repo = Sgit.getRepoPath().get
       if (new File("/.sgit").exists()) FileManager.delete(s"$repo/.sgit")
     }
   }
-  val initializer = new Initializer()
-  initializer.initialise
   val optionWorkingDirectory: Option[String] = Sgit.getRepoPath()
   val optionSgitDirectory: Option[String] = Sgit.getSgitPath()
   if (optionSgitDirectory.isDefined && optionWorkingDirectory.isDefined) {

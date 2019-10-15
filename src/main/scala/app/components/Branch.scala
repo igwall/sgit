@@ -9,9 +9,10 @@ object Branch {
     if (lastCommit.isEmpty()) {
       return None
     } else {
-      val error =
+      val message =
         FileManager.createFile(name, lastCommit, getPath(sgitDirectory))
-      if (error.isDefined) error else Some("Branch correctly created")
+      if (message.isDefined) Some("Branch correctly created")
+      else Some("Branch already existing")
     }
   }
 
