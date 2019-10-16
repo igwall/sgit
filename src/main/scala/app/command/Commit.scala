@@ -9,21 +9,21 @@ object Commit {
       message: String,
       workingDirectory: String
   ): String = {
-      //Prepare all the trees to save
-      val stageContent = Stage.readStage(sgitDirectory)
-      Stage.backup(sgitDirectory)
-      val stageLines = stageContent.split("\n").toList
-      val contentToSave =
-        prepareContent(stageLines, workingDirectory, sgitDirectory)
+    //Prepare all the trees to save
+    val stageContent = Stage.readStage(sgitDirectory)
+    Stage.backup(sgitDirectory)
+    val stageLines = stageContent.split("\n").toList
+    val contentToSave =
+      prepareContent(stageLines, workingDirectory, sgitDirectory)
 
-      //Data about commit
-      val name = "/"
-      val olderCommit: String = Head.getLastCommit(sgitDirectory)
-      val tree = Tree.createTree(name, contentToSave, sgitDirectory)
-      val hash =
-        FileManager.createHash(name + contentToSave.mkString + sgitDirectory)
-      save(hash, olderCommit, tree.hash, message, sgitDirectory)
-      hash
+    //Data about commit
+    val name = ""
+    val olderCommit: String = Head.getLastCommit(sgitDirectory)
+    val tree = Tree.createTree(name, contentToSave, sgitDirectory)
+    val hash =
+      FileManager.createHash(name + contentToSave.mkString + sgitDirectory)
+    save(hash, olderCommit, tree.hash, message, sgitDirectory)
+    hash
   }
 
   def prepareContent(
@@ -81,8 +81,13 @@ object Commit {
     Head.update(hash, sgitDirectory)
 
     //Save informations about commit in /commits
+    /**
+      * line 1 : parent Commit
+      * line 2 : parent tree
+      * line 3 : (optionnal) message
+      */
     val content =
-      s"oldCommit : $olderCommit\ntrees: $tree\nmessage: $message"
+      s"$olderCommit\n$tree\n$message"
     val path = sgitDirectory + "/commits"
     FileManager.createFile(hash, content, path)
   }
@@ -92,6 +97,16 @@ object Commit {
     FileManager.extractContentFromPath(s"$sgitDirectory/commits/$commit")
   }
 
-  def extractContentFromCommit(sgitDirectory: String, hash: String): String = {}
+  def extractContentFromCommit(sgitDirectory: String, hash: String): String = {
+    FileManager.extractContentFromPath(s"$sgitDirectory/commits/$hash")
+  }
+
+  def getTree(sgitDirectory: String, commitHash: String): String = {
+    val content = FileManager
+      .extractContentFromPath(s"$sgitDirectory/commits/$commitHash")
+      .split("\n")
+    content(1)
+
+  }
 
 }

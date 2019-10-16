@@ -1,5 +1,5 @@
 package app.components
-import app.components.{Sgit,FileManager}
+import app.components.{Sgit, FileManager}
 import java.io.File
 
 object Blobs {
@@ -13,7 +13,7 @@ object Blobs {
 
     if (new File(fileToBlob).exists()) {
       val pathSplit = fileToBlob.split("/")
-      val fileName = pathSplit(pathSplit.size-1)
+      val fileName = pathSplit(pathSplit.size - 1)
       val contentFile: String =
         s"$fileName\n${FileManager.extractContentFromPath(fileToBlob)}"
       val hashFileName: String = FileManager.createHash(contentFile)
@@ -29,7 +29,13 @@ object Blobs {
 
   }
 
-  def getContent(hash: String, sgitDirectory : String):String = {
+  def extractName(sgitDirectory: String, blobHash: String): String = {
+    val blob =
+      FileManager.extractContentFromPath(sgitDirectory + "/blobs/" + blobHash)
+    blob.split("\n")(0)
+  }
+
+  def getContent(hash: String, sgitDirectory: String): String = {
     val fullPath = s"$sgitDirectory/blobs/$hash"
     FileManager.extractContentFromPath(fullPath)
   }

@@ -11,17 +11,25 @@ object Diff {
   def getDiff(sgitDirectory: String, repoDirectory: String): String = {
 
     // Récupérer le stage
+    listOfDiff(sgitDirectory, repoDirectory).mkString
+    // Récupérer le path pour dire qu'on fait le diff la dessus : /src/xxx.txt et avec les diffs en deesous
+    // Séparer les blobs des paths
+    // Pour chaque Blob et chaque path (Dans un map)
+  }
+
+  def listOfDiff(sgitDirectory: String, repoDirectory: String): List[String] = {
+
+    // Récupérer le stage
     val hashAndPath = Stage.getTuplesHashPath(sgitDirectory)
     hashAndPath.map { hashAndPath =>
-      s"""\r${hashAndPath._2}  
-          ${makeDiff(
+      makeDiff(
         Blobs.getContent(hashAndPath._1, sgitDirectory).split("\n").toList,
         FileManager
           .extractContentFromShortenPath(hashAndPath._2, repoDirectory)
           .split("\n")
           .toList
-      )}\n"""
-    }.mkString
+      )
+    }
     // Récupérer le path pour dire qu'on fait le diff la dessus : /src/xxx.txt et avec les diffs en deesous
     // Séparer les blobs des paths
     // Pour chaque Blob et chaque path (Dans un map)
@@ -229,7 +237,7 @@ object Diff {
       newFile,
       oldFile.size - 1,
       newFile.size - 1,
-      List(("", ""))
+      List()
     )
   }
 

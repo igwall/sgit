@@ -43,4 +43,16 @@ object Branch {
       s"$sgitDirectory/branches/"
     )
   }
+
+  def getLastCommit(sgitDirectory: String): String = {
+    val currentBranch = getCurrentBranch(sgitDirectory)
+    FileManager.extractContentFromPath(
+      s"$sgitDirectory/branches/$currentBranch"
+    )
+  }
+  def getCommitFromBranch(sgitDirectory: String, branchName: String): String = {
+    FileManager.extractContentFromPath(
+      s"$sgitDirectory/branches/$branchName"
+    )
+  }
 }

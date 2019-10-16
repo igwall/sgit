@@ -14,4 +14,10 @@ class DiffSpec extends FlatSpec with Matchers {
     val repoDirectory = Sgit.getRepoPath().get
     println(Diff.getDiff(sgitDirectory, repoDirectory).mkString)
   }
+
+  it should "return an empty list if there no diff" in {
+    val sgitDirectory = Sgit.getSgitPath().get
+    val repoDirectory = Sgit.getRepoPath().get
+    assert(Diff.getDiff(sgitDirectory, repoDirectory).isEmpty())
+  }
 }
