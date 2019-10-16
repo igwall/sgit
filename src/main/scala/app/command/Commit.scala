@@ -3,6 +3,7 @@ import app.components.Stage
 import app.components.Head
 import app.components.Tree
 import app.components.FileManager
+import java.io.File
 
 object Commit {
 
@@ -10,33 +11,44 @@ object Commit {
       sgitDirectory: String,
       message: String,
       repoDirectory: String
-  ): String = {
+  ): Option[String] = {
     //Prepare all the trees to save
     val stageContent = Stage.readStage(sgitDirectory)
     Stage.backup(sgitDirectory)
     val stageLines = stageContent.split("\n").toList
     val contentToSave = prepareContent(stageLines, repoDirectory, sgitDirectory)
-
+    if (contentToSave.isDefined) {
+      val name = "/"
+      val olderCommit: String = Head.getLastCommit(sgitDirectory)
+      val tree = Tree.createTree(name, contentToSave.get, sgitDirectory)
+      val hash =
+        FileManager.createHash(name + contentToSave.mkString + sgitDirectory)
+      save(hash, olderCommit, tree.hash, message, sgitDirectory)
+      Some(hash)
+    } else {
+      None
+    }
     //Data about commit
-    val name = "/"
-    val olderCommit: String = Head.getLastCommit(sgitDirectory)
-    val tree = Tree.createTree(name, contentToSave, sgitDirectory)
-    val hash =
-      FileManager.createHash(name + contentToSave.mkString + sgitDirectory)
-    save(hash, olderCommit, tree.hash, message, sgitDirectory)
-    hash
+
   }
 
   def prepareContent(
       listOfStageLines: List[String],
       repoDirectory: String,
       sgitDirectory: String
-  ): List[List[String]] = {
+  ): Option[List[List[String]]] = {
     //On doit mettre le path.split + hash
     //val contentCleaned = deleteFilesCheck(listOfStageLines, repoDirectory, sgitDirectory)
-    listOfStageLines
-      .map(elem => transformPathLine(elem.split(s" ${Stage.separator} ")))
-      .toList
+    if (listOfStageLines.head.isEmpty) {
+      None
+    } else {
+      Some(
+        listOfStageLines
+          .map(elem => transformPathLine(elem.split(s" ${Stage.separator} ")))
+          .toList
+      )
+    }
+
   }
 
   def deleteFilesCheck(
@@ -84,7 +96,7 @@ object Commit {
     //Save informations about commit in /commits
     val content =
       s"oldCommit : $olderCommit\ntrees: $tree\nmessage: $message"
-    val path = sgitDirectory + "/commits"
+    val path = s"${sgitDirectory}${File.separator}commits"
     FileManager.createFile(hash, content, path)
   }
 

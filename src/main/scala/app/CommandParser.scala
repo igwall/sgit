@@ -14,7 +14,12 @@ case class CommandParser(params: Array[String]) {
   def treatment() = params(0) match {
     case "init" =>
       val initializer = new Initializer()
-      initializer.initialise
+      val res = initializer.initialise
+      if(res.isDefined){
+        println(res.get)
+      } else {
+        println(s"${Console.RED_B}Error: already existing directory: .sgit${Console.RESET}")
+      }
     case "add" =>
       val optionPath: Option[String] = Sgit.getRepoPath()
       val optionDirectory: Option[String] = Sgit.getSgitPath()

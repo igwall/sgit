@@ -16,7 +16,7 @@ class Initializer() {
     * Method that return true if it could create a .sgit folder
     * Create a .sgit folder with all sub folders and files necessary to use sgit
     */
-  def initialise: Boolean = {
+  def initialise: Option[String] = {
 
     val path = Paths.get("").toAbsolutePath().toString()
     val folders = List("tags", "commits", "trees", "blobs", "branches", ".old")
@@ -36,11 +36,11 @@ class Initializer() {
       new File(
         sgitPath + File.separator + ".old" + File.separator + "STAGE.old"
       ).createNewFile()
-      println(s"${Console.GREEN}Initialized empty .sgit repository in $path ${Console.RESET}")
-      return true
+      Some(
+        s"${Console.GREEN}Initialized empty .sgit repository in $path ${Console.RESET}"
+      )
     } else {
-      println("Error: already existing directory: .sgit")
-      return false
+      None
     }
   }
 

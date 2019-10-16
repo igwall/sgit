@@ -33,7 +33,7 @@ object Status {
       FileManager.getAllFilesFromPath(workingDirectory, workingDirectory)
     val stageContent = Stage.getContent(sgitDirectory)
     val res = allFiles.filter(file => !Stage.contains(file, sgitDirectory))
-    res.map(elem => s"-  $elem \n").mkString
+    res.filter(line => line != "").map(elem => s"-  $elem \n").mkString
   }
 
   // Get all the files that weren't in the previous commit but added now

@@ -11,7 +11,7 @@ object Stage {
       repoDirectory: String
   ): Option[String] = {
     val fullPath = repoDirectory + path
-    val stagePath = sgitDirectory + File.separator + "/STAGE"
+    val stagePath = sgitDirectory + File.separator + "STAGE"
     //Check that the STAGE file is at the good place
     if (FileManager.exist(stagePath)) {
       val contentStage = FileManager.extractContentFromPath(stagePath)
@@ -56,15 +56,17 @@ object Stage {
       sgitDirectory: String
   ): Unit = {
     FileManager.delete(stagePath)
-    FileManager.createFile("/STAGE", contentStage, sgitDirectory)
+    FileManager.createFile("STAGE", contentStage, sgitDirectory)
   }
 
   def readStage(sgitDirectory: String): String = {
-    return FileManager.extractContentFromPath(s"${sgitDirectory}/STAGE")
+    return FileManager.extractContentFromPath(
+      s"${sgitDirectory}${File.separator}STAGE"
+    )
   }
 
   def getPath(sgitDirectory: String): String = {
-    s"${sgitDirectory}/STAGE"
+    s"${sgitDirectory}${File.separator}STAGE"
   }
 
   def cleanPath(path: String, projectDirectory: String): String = {
@@ -79,7 +81,9 @@ object Stage {
   def delete(sgitDirectory: String, path: String) {
 
     val contentOfStage =
-      FileManager.extractContentFromPath(s"${sgitDirectory}/STAGE")
+      FileManager.extractContentFromPath(
+        s"${sgitDirectory}${File.separator}STAGE"
+      )
     contentOfStage
       .split("\n") // => Splitted by line
       .filter(line => !line.contains(path))
@@ -95,20 +99,23 @@ object Stage {
 
   // Save the STAGE
   def backup(sgitDirectory: String) {
-    val path = s"$sgitDirectory/.old/STAGE.old"
+    val path =
+      s"${sgitDirectory}${File.separator}.old${File.separator}STAGE.old"
     if (FileManager.exist(path)) {
       FileManager.delete(path)
     }
     FileManager.createFile(
       "STAGE.old",
       Stage.getContent(sgitDirectory),
-      s"$sgitDirectory/.old/"
+      s"${sgitDirectory}${File.separator}.old"
     )
   }
 
   // Give the content of the ols Stage
   def getOldStage(sgitDirectory: String): String = {
-    FileManager.extractContentFromPath(s"$sgitDirectory/.old/STAGE.old")
+    FileManager.extractContentFromPath(
+      s"${sgitDirectory}${File.separator}.old${File.separator}STAGE.old"
+    )
   }
 
   def getAllPath(sgitDirectory: String): List[String] = {

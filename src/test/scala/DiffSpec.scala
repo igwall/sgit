@@ -6,6 +6,6 @@ class DiffSpec extends FlatSpec with Matchers {
     val file1 = List("a", "b", "c", "d", "e")
     val file2 = List("a", "c", "f", "e")
     val diff = Diff.makeDiff(file1, file2)
-    print(diff)
+    assert(!diff.isEmpty())
   }
 }

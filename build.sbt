@@ -16,3 +16,5 @@ import sbtassembly.AssemblyPlugin.defaultUniversalScript
 assemblyOption in assembly := (assemblyOption in assembly).value
   .copy(prependShellScript = Some(defaultUniversalScript(shebang = false)))
 assemblyJarName in assembly := s"${name.value}-${version.value}"
+
+parallelExecution in Test := false

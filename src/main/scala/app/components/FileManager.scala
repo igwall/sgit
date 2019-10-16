@@ -20,8 +20,8 @@ object FileManager {
   }
 
   def update(fileName: String, content: String, path: String) = {
-    if (exist(path)) {
-      delete(fileName)
+    if (exist(s"$path/$fileName")) {
+      delete(s"$path/$fileName")
       createFile(fileName, content, path)
     } else {
       createFile(fileName, content, path)
@@ -33,7 +33,6 @@ object FileManager {
     val content = reader.mkString
     reader.close()
     content
-
   }
 
   def createFile(name: String, data: String, path: String): Option[String] = {
@@ -41,6 +40,7 @@ object FileManager {
       None
     } else {
       val file = new File(path + File.separator + name)
+      file.createNewFile()
       val bw = new BufferedWriter(new FileWriter(file))
       bw.write(data)
       bw.close()

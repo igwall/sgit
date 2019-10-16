@@ -1,4 +1,5 @@
 package app.components
+import java.io.File
 
 case class Tree(
     name: String,
@@ -11,7 +12,7 @@ case class Tree(
     val content =
       s"name: ${name}\ntrees: ${trees.mkString(",")}\nblobs: ${blobs.mkString(",")}\n"
     val fileName = hash
-    val path = s"${sgitRepository}/trees"
+    val path = s"${sgitRepository}${File.separator}trees"
     FileManager.createFile(fileName, content, path)
   }
 

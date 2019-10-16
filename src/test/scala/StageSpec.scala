@@ -8,9 +8,17 @@ import app.components.Blobs
 
 class StageSpec extends FlatSpec with Matchers {
 
+  override def withFixture(test: NoArgTest) = {
+    val initializer = new Initializer()
+    initializer.initialise
+    try test()
+    finally {
+      val repo = Sgit.getRepoPath().get
+      if (new File(s"$repo/.sgit").exists()) FileManager.delete(s"$repo/.sgit")
+    }
+  }
+
   "Stage" should "add line into itself" in {
-    val init = new Initializer()
-    init.initialise
     val sgitFolder = Sgit.getSgitPath().get
     val repoFolder = Sgit.getRepoPath().get
     val blob = Blobs.createBlob(
@@ -32,34 +40,29 @@ class StageSpec extends FlatSpec with Matchers {
   }
   it should "edit the hash if the file is edited then added" in {
     //We edit the file1.txt to check that we could update the hash
-    val init = new Initializer()
-    init.initialise
     val sgitFolder = Sgit.getSgitPath().get
     val repoFolder = Sgit.getRepoPath().get
-    FileManager.delete(
-      s"${repoFolder}/src/test/testEnvironment/file1.txt"
-    )
-    FileManager.createFile(
-      "file1.txt",
-      "I'm not tired",
-      s"${repoFolder}/src/test/testEnvironment/"
-    )
-    val blob = Blobs.createBlob(
+
+    Stage.addElement(
+      "aaaa",
       s"${repoFolder}/src/test/testEnvironment/file1.txt",
-      sgitFolder
+      sgitFolder,
+      repoFolder
     )
-    if (blob.isDefined) {
-      Stage.addElement(
-        blob.get,
-        s"${repoFolder}/src/test/testEnvironment/file1.txt",
-        sgitFolder,
-        repoFolder
-      )
-      val stage = new File(sgitFolder + "PATH")
-      assert(
-        !FileManager.extractContentFromPath(sgitFolder + "/STAGE").isEmpty()
-      )
-    }
+
+    Stage.addElement(
+      "bbbb",
+      s"${repoFolder}/src/test/testEnvironment/file1.txt",
+      sgitFolder,
+      repoFolder
+    )
+    val res = FileManager
+      .extractContentFromPath(s"${sgitFolder}${File.separator}STAGE")
+      .split("\n")
+      .size == 1
+    assert(
+      res
+    )
   }
 
   it should "clean the path" in {
@@ -71,14 +74,21 @@ class StageSpec extends FlatSpec with Matchers {
 
   it should "get all the paths" in {
     val sgitFolder = Sgit.getSgitPath().get
+    val repoFolder = Sgit.getRepoPath().get
+    Stage.addElement(
+      "bbbb",
+      s"${repoFolder}/src/test/testEnvironment/file1.txt",
+      sgitFolder,
+      repoFolder
+    )
+    Stage.addElement(
+      "aaaa",
+      s"${repoFolder}/src/test/testEnvironment/file2.txt",
+      sgitFolder,
+      repoFolder
+    )
     val paths = Stage.getAllPath(sgitFolder)
-    assert(paths.size == 1)
-  }
-
-  it should "get the content from the old stage" in {
-    val sgitFolder = Sgit.getSgitPath().get
-    val paths = Stage.getOldStage(sgitFolder)
-    assert(!paths.isEmpty())
+    assert(paths.size == 2)
   }
 
 }

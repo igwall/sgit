@@ -1,7 +1,27 @@
 import org.scalatest._
 import app.components.{FileManager, Sgit, Tree}
+import app.command.Initializer
+import java.io.File
 
 class TreeSpec extends FlatSpec with Matchers {
+
+  override def withFixture(test: NoArgTest) = {
+    // avant le test
+    val init = new Initializer()
+    init.initialise
+
+    val sgitDirectory = Sgit.getSgitPath().get
+    val repoDirectory = Sgit.getRepoPath().get
+    // Fait le test
+    try test()
+    finally {
+      val repo = Sgit.getRepoPath()
+      if (repo.isDefined) {
+        if (new File("/.sgit").exists())
+          FileManager.delete(s"${repo.get}/.sgit")
+      }
+    }
+  }
 
   "Tree" should "create correct architecture" in {
     val pathListed1 = List("b", "fin")
@@ -19,7 +39,8 @@ class TreeSpec extends FlatSpec with Matchers {
     val sgitDirectory = Sgit.getSgitPath()
     if (sgitDirectory.isDefined) {
       val tree = Tree.createTree(treeName, listOfPath, sgitDirectory.get)
-      val pathOfTree = s"${sgitDirectory.get}/trees/${tree.hash}"
+      val pathOfTree =
+        s"${sgitDirectory.get}${File.separator}trees${File.separator}${tree.hash}"
       assert(FileManager.exist(pathOfTree))
     }
   }
