@@ -2,8 +2,10 @@ package app.command
 import app.components.Stage
 import app.components.Head
 import app.components.Tree
+import app.command.Status
 import app.components.{FileManager,Log}
 import java.io.File
+
 
 object Commit {
 
@@ -29,12 +31,11 @@ object Commit {
       None
     }
     //Data about commit
-
   }
 
   def prepareContent(
       listOfStageLines: List[String],
-      repoDirectory: String,
+      workingDirectory: String,
       sgitDirectory: String
   ): Option[List[List[String]]] = {
     //On doit mettre le path.split + hash
@@ -48,12 +49,11 @@ object Commit {
           .toList
       )
     }
-
   }
 
   def deleteFilesCheck(
       listOfStageLines: List[String],
-      repoDirectory: String,
+      workingDirectory: String,
       sgitDirectory: String
   ): List[String] = {
     val deleteBlankLine = listOfStageLines.filter(line => line != "")
@@ -94,11 +94,33 @@ object Commit {
     Head.update(hash, sgitDirectory)
 
     //Save informations about commit in /commits
+    /**
+      * line 1 : parent Commit
+      * line 2 : parent tree
+      * line 3 : (optionnal) message
+      */
     val content =
       s"oldCommit : $olderCommit\ntrees: $tree\nmessage: $message"
     val path = s"${sgitDirectory}${File.separator}commits"
     FileManager.createFile(hash, content, path)
     Log.update(sgitDirectory,s"$hash -- $message\n Author: Jonh Doe\n\n")
+  }
+
+  def extractContentLastCommit(sgitDirectory: String): String = {
+    val commit = Head.getLastCommit(sgitDirectory)
+    FileManager.extractContentFromPath(s"$sgitDirectory/commits/$commit")
+  }
+
+  def extractContentFromCommit(sgitDirectory: String, hash: String): String = {
+    FileManager.extractContentFromPath(s"$sgitDirectory/commits/$hash")
+  }
+
+  def getTree(sgitDirectory: String, commitHash: String): String = {
+    val content = FileManager
+      .extractContentFromPath(s"$sgitDirectory/commits/$commitHash")
+      .split("\n")
+    content(1)
+
   }
 
 }

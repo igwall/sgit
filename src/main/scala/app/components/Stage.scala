@@ -1,5 +1,8 @@
 package app.components
 import java.io.File
+import scala.annotation.tailrec
+import app.command.Commit
+import app.components.{Tree, Blobs}
 object Stage {
   // If the path is not written, add it to file
   val separator = "::"
@@ -129,8 +132,92 @@ object Stage {
       )
   }
 
-  def getMappingHash(sgitDirectory: String) = {
+  def getAllBlobs(sgitDirectory: String): List[String] = {
+    Stage
+      .readStage(sgitDirectory)
+      .split("\n")
+      .toList
+      .flatMap(
+        _.split(s" ${Stage.separator} ").toList
+          .filter(!_.contains("/"))
+      )
+  }
+
+  def getTuplesHashPath(sgitDirectory: String): List[(String, String)] = {
+    val blobs = Stage.getAllBlobs(sgitDirectory)
+    val paths = Stage.getAllPath(sgitDirectory)
+
+    @tailrec
+    def createTuple(
+        blobs: List[String],
+        paths: List[String],
+        res: List[(String, String)]
+    ): List[(String, String)] = {
+      if (blobs.tail.isEmpty || paths.isEmpty) {
+        res
+      } else {
+        val newRes = (blobs.head, paths.head) +: res
+        createTuple(blobs.tail, paths.tail, newRes)
+      }
+    }
+    createTuple(blobs, paths, List())
+  }
+
+  def getMappingHash(sgitDirectory: String): List[String] = {
     val stage = Stage.getContent(sgitDirectory)
-    val stageSplitted = stage.split("\n")
+    stage.split("\n").toList
+
+  }
+
+  def createStageFromMainTree(
+      sgitDirectory: String,
+      mainTree: String
+  ): String = {
+
+    def createStage(
+        currentPath: String,
+        currentStageContent: String,
+        trees: List[String]
+    ): String = {
+      trees.map { tree =>
+        val contentOfTree = extractFromHash(sgitDirectory, tree)
+        val path = contentOfTree._1
+        val trees = contentOfTree._2.map(_.trim).filterNot(_ == "")
+        val blobs = contentOfTree._3.map(_.trim).filterNot(_ == "")
+        val content = blobs
+          .map(
+            blob =>
+              blob + " :: " + currentPath + File.separator + path + File.separator + Blobs
+                .extractName(sgitDirectory, blob)
+          )
+          .mkString
+        if (trees.nonEmpty) {
+          createStage(
+            currentPath + File.separator + path,
+            currentStageContent + content,
+            trees
+          )
+        } else {
+          currentStageContent + content
+        }
+      }.mkString
+    }
+    // Get the tree from commit Content
+    println(s"mainTree : <$mainTree>")
+    createStage("", "", List(mainTree))
+  }
+
+  def extractFromHash(
+      sgitDirectory: String,
+      hash: String
+  ): (String, List[String], List[String]) = {
+    val content =
+      FileManager.extractContentFromPath(sgitDirectory + "/trees/" + hash)
+    val contentSplitted = content.split("\n")
+    val contentCleaned = contentSplitted.map(line => line drop 2)
+    val name = contentCleaned(0)
+    val trees = contentCleaned(1).split(",").toList
+    val blobs = contentCleaned(2).split(",").toList
+    (name, trees, blobs)
   }
 }

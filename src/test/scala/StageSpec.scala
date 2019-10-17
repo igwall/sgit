@@ -3,8 +3,8 @@ import app.components.Stage
 import java.io.File
 import app.components.FileManager
 import app.components.Sgit
-import app.command.Initializer
-import app.components.Blobs
+import app.command.{Initializer, Commit}
+import app.components.{Blobs, Branch}
 
 class StageSpec extends FlatSpec with Matchers {
 
@@ -91,4 +91,19 @@ class StageSpec extends FlatSpec with Matchers {
     assert(paths.size == 2)
   }
 
+  it should "return a list of blob" in {
+    val sgitFolder = Sgit.getSgitPath().get
+    val blobs = Stage.getAllBlobs(sgitFolder)
+  }
+
+  it should "construct a stage file" in {
+    val sgitDirectory = Sgit.getSgitPath().get
+    val commitHash = Branch.getCommitFromBranch(sgitDirectory, "master")
+    val mainTree = Commit.getTree(sgitDirectory, commitHash)
+    println("Main tree>" + mainTree)
+    val contentFromhash = Stage.extractFromHash(sgitDirectory, mainTree)
+    println("maintree content>" + contentFromhash.toString())
+    val newStage = Stage.createStageFromMainTree(sgitDirectory, mainTree)
+    println("new Stage: " + newStage)
+  }
 }

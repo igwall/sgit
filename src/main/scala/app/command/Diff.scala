@@ -2,8 +2,40 @@ package app.command
 import scala.annotation.tailrec
 import scala.collection.immutable.HashMap
 import scala.math.max
+import app.components.Stage
+import app.components.Blobs
+import app.components.FileManager
 
 object Diff {
+  // Main method for the command
+  def getDiff(sgitDirectory: String, repoDirectory: String): String = {
+
+    // Récupérer le stage
+    listOfDiff(sgitDirectory, repoDirectory).mkString
+    // Récupérer le path pour dire qu'on fait le diff la dessus : /src/xxx.txt et avec les diffs en deesous
+    // Séparer les blobs des paths
+    // Pour chaque Blob et chaque path (Dans un map)
+  }
+
+  def listOfDiff(sgitDirectory: String, repoDirectory: String): List[String] = {
+
+    // Récupérer le stage
+    val hashAndPath = Stage.getTuplesHashPath(sgitDirectory)
+    hashAndPath.map { hashAndPath =>
+      makeDiff(
+        Blobs.getContent(hashAndPath._1, sgitDirectory).split("\n").toList,
+        FileManager
+          .extractContentFromShortenPath(hashAndPath._2, repoDirectory)
+          .split("\n")
+          .toList
+      )
+    }
+    // Récupérer le path pour dire qu'on fait le diff la dessus : /src/xxx.txt et avec les diffs en deesous
+    // Séparer les blobs des paths
+    // Pour chaque Blob et chaque path (Dans un map)
+  }
+
+  // Main part of the "diff" algorithm between two files
   def makeDiff(
       oldFile: List[String],
       newFile: List[String]
@@ -205,13 +237,17 @@ object Diff {
       newFile,
       oldFile.size - 1,
       newFile.size - 1,
-      List(("", ""))
+      List()
     )
   }
 
   def displayDiff(values: List[(String, String)]): String = {
     val edited = values.filter(p => p._1 != "")
-    edited.map(value => s"\r${Console.GREEN}${value._1} ${value._2}\n").mkString
+    edited.map { value =>
+      if (value._1 == "++")
+        s"\r${Console.GREEN}${value._1} ${value._2}${Console.RESET}\n"
+      else s"\r${Console.RED}${value._1} ${value._2}${Console.RESET}\n"
+    }.mkString
   }
 
 }

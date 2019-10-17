@@ -33,6 +33,14 @@ object FileManager {
     val content = reader.mkString
     reader.close()
     content
+
+  }
+
+  def extractContentFromShortenPath(path: String, repoDirectory: String) = {
+    val reader = Source.fromFile(repoDirectory + path)
+    val content = reader.mkString
+    reader.close()
+    content
   }
 
   def createFile(name: String, data: String, path: String): Option[String] = {
