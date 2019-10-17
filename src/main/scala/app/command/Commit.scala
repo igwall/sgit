@@ -2,7 +2,7 @@ package app.command
 import app.components.Stage
 import app.components.Head
 import app.components.Tree
-import app.components.FileManager
+import app.components.{FileManager,Log}
 import java.io.File
 
 object Commit {
@@ -98,6 +98,7 @@ object Commit {
       s"oldCommit : $olderCommit\ntrees: $tree\nmessage: $message"
     val path = s"${sgitDirectory}${File.separator}commits"
     FileManager.createFile(hash, content, path)
+    Log.update(sgitDirectory,s"$hash -- $message\n Author: Jonh Doe\n\n")
   }
 
 }

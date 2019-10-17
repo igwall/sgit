@@ -1,6 +1,5 @@
 package app.command
-import app.command.Initializer
-import app.command.AddCommand
+import app.command.{Initializer, AddCommand, Helper}
 import app.components.Sgit
 import app.components.Branch
 
@@ -15,10 +14,12 @@ case class CommandParser(params: Array[String]) {
     case "init" =>
       val initializer = new Initializer()
       val res = initializer.initialise
-      if(res.isDefined){
+      if (res.isDefined) {
         println(res.get)
       } else {
-        println(s"${Console.RED_B}Error: already existing directory: .sgit${Console.RESET}")
+        println(
+          s"${Console.RED_B}Error: already existing directory: .sgit${Console.RESET}"
+        )
       }
     case "add" =>
       val optionPath: Option[String] = Sgit.getRepoPath()
@@ -86,7 +87,9 @@ case class CommandParser(params: Array[String]) {
         println("Error: It seems that your not in sgit project")
       }
 
-    case _ => println("Unknow command prompted...")
+    case _ =>
+      println("Unknow command prompted...")
+      println(Helper.getHelp)
 
   }
 

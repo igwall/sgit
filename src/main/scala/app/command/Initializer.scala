@@ -3,6 +3,7 @@ import java.io.File
 import java.nio.file.FileAlreadyExistsException
 import java.nio.file.Paths
 import scala.annotation.tailrec
+import app.components.FileManager
 
 /**
   * /!\ I/O Class /!\
@@ -20,7 +21,7 @@ class Initializer() {
 
     val path = Paths.get("").toAbsolutePath().toString()
     val folders = List("tags", "commits", "trees", "blobs", "branches", ".old")
-    val files = List("STAGE", "HEAD")
+    val files = List("STAGE", "HEAD", "log")
     val sgitRepo = new File(".sgit")
     val sgitPath = path + File.separator + ".sgit"
 
@@ -36,6 +37,8 @@ class Initializer() {
       new File(
         sgitPath + File.separator + ".old" + File.separator + "STAGE.old"
       ).createNewFile()
+
+      FileManager.update("log", "----- INITIAL PROJECT -----", sgitPath)
       Some(
         s"${Console.GREEN}Initialized empty .sgit repository in $path ${Console.RESET}"
       )
