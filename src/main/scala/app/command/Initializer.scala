@@ -36,7 +36,7 @@ class Initializer() {
       files.map(
         file => new File(sgitPath + File.separator + file).createNewFile()
       )
-      FileManager.createFile("/BRANCH", "master", sgitPath)
+      FileManager.createFile("BRANCH", "master", sgitPath)
 
       new File(
         sgitPath + File.separator + ".old" + File.separator + "STAGE.old"

@@ -1,6 +1,7 @@
 import org.scalatest._
-import app.command.Diff
-import app.components.Sgit
+import app.command.{Diff, Initializer}
+import app.components.{Sgit, FileManager}
+import java.io.File
 
 class DiffSpec extends FlatSpec with Matchers {
 
@@ -22,7 +23,7 @@ class DiffSpec extends FlatSpec with Matchers {
     val file1 = List("a", "b", "c", "d", "e")
     val file2 = List("a", "c", "f", "e")
     val diff = Diff.makeDiff(file1, file2)
-    assert(diff.isEmpty())
+    assert(!diff.isEmpty())
   }
 
   it should "get the diff from stage and current working tree" in {

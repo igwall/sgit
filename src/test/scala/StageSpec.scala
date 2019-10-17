@@ -3,8 +3,8 @@ import app.components.Stage
 import java.io.File
 import app.components.FileManager
 import app.components.Sgit
-import app.command.{Initializer, Commit}
-import app.components.{Blobs, Branch}
+import app.command.{Initializer, Commit, AddCommand}
+import app.components.{Blobs, Branch, Head}
 
 class StageSpec extends FlatSpec with Matchers {
 
@@ -98,12 +98,54 @@ class StageSpec extends FlatSpec with Matchers {
 
   it should "construct a stage file" in {
     val sgitDirectory = Sgit.getSgitPath().get
-    val commitHash = Branch.getCommitFromBranch(sgitDirectory, "master")
+    val repoDirectory = Sgit.getRepoPath().get
+
+    // populate branch dev
+    val fileToAdd: String = "/src/test/testEnvironment/file1.txt"
+    val add = new AddCommand(fileToAdd, repoDirectory, sgitDirectory)
+    add.addToStage()
+    val commitCreated =
+      Commit.create(sgitDirectory, "populate master", repoDirectory)
+    val branchCreated = Branch.createBranch("dev", sgitDirectory)
+
+    Branch.setCurrentBranch(sgitDirectory, "dev")
+
+    val commitHash = Branch.getCommitFromBranch(sgitDirectory, "dev")
     val mainTree = Commit.getTree(sgitDirectory, commitHash)
-    println("Main tree>" + mainTree)
     val contentFromhash = Stage.extractFromHash(sgitDirectory, mainTree)
-    println("maintree content>" + contentFromhash.toString())
     val newStage = Stage.createStageFromMainTree(sgitDirectory, mainTree)
-    println("new Stage: " + newStage)
+    assert(newStage.split("\n").size == 1)
   }
+
+  it should "reconstruct the tree from a path given in parameter" in {
+    val sgitDirectory = Sgit.getSgitPath().get
+    val repoDirectory = Sgit.getRepoPath().get
+
+    // populate branch dev
+    val fileToAdd: String = "/src/test/testEnvironment/file1.txt"
+    val add = new AddCommand(fileToAdd, repoDirectory, sgitDirectory)
+    add.addToStage()
+    val commitCreated =
+      Commit.create(sgitDirectory, "populate master", repoDirectory)
+    val branchCreated = Branch.createBranch("dev", sgitDirectory)
+
+    FileManager.update(
+      "/src/test/testEnvironment/file1.txt",
+      "igwall is not there",
+      sgitDirectory
+    )
+    val add2 = new AddCommand(fileToAdd, repoDirectory, sgitDirectory)
+    add2.addToStage()
+    Commit.create(sgitDirectory, "populate master again", repoDirectory)
+
+    Branch.setCurrentBranch(sgitDirectory, "dev")
+
+    val commitHash = Branch.getCommitFromBranch(sgitDirectory, "dev")
+    val mainTree = Commit.getTree(sgitDirectory, commitHash)
+    val contentFromhash = Stage.extractFromHash(sgitDirectory, mainTree)
+    val newStage = Stage.createStageFromMainTree(sgitDirectory, mainTree)
+    println(Stage.importStage(sgitDirectory, newStage))
+
+  }
+
 }

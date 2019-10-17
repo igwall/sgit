@@ -5,7 +5,7 @@ import java.io.File
 import app.components.Branch
 class BranchSpec extends FlatSpec with Matchers {
 
-  /*override def withFixture(test: NoArgTest) = {
+  override def withFixture(test: NoArgTest) = {
     // avant le test
     val init = new Initializer()
     init.initialise
@@ -45,5 +45,5 @@ class BranchSpec extends FlatSpec with Matchers {
     val res = Branch.createBranch("create-me-please", sgitDirectory)
     assert(!res.isDefined)
   }
- */
+
 }

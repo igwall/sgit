@@ -182,21 +182,33 @@ object Stage {
       trees.map { tree =>
         val contentOfTree = extractFromHash(sgitDirectory, tree)
         val path = contentOfTree._1
+        println(s"current path : <$currentPath>  path : <$path>")
         val trees = contentOfTree._2.map(_.trim).filterNot(_ == "")
         val blobs = contentOfTree._3.map(_.trim).filterNot(_ == "")
-        val content = blobs
-          .map(
-            blob =>
-              blob + " :: " + currentPath + File.separator + path + File.separator + Blobs
-                .extractName(sgitDirectory, blob)
-          )
-          .mkString
+        val content = blobs.map { blob =>
+          if (currentPath == "") {
+            blob + " :: " + path + File.separator + Blobs
+              .extractName(sgitDirectory, blob)
+          } else {
+            blob + " :: " + currentPath + File.separator + path + File.separator + Blobs
+              .extractName(sgitDirectory, blob)
+          }
+
+        }.mkString
         if (trees.nonEmpty) {
-          createStage(
-            currentPath + File.separator + path,
-            currentStageContent + content,
-            trees
-          )
+          if (currentPath == "") {
+            createStage(
+              path,
+              currentStageContent + content,
+              trees
+            )
+          } else {
+            createStage(
+              currentPath + File.separator + path,
+              currentStageContent + content,
+              trees
+            )
+          }
         } else {
           currentStageContent + content
         }
@@ -219,5 +231,30 @@ object Stage {
     val trees = contentCleaned(1).split(",").toList
     val blobs = contentCleaned(2).split(",").toList
     (name, trees, blobs)
+  }
+
+  def importStage(sgitDirectory: String, stage: String) {
+    // Write the new content in stage file
+    FileManager.delete(s"$sgitDirectory/STAGE")
+    FileManager.createFile("STAGE", stage, sgitDirectory)
+
+    //Change the content of all files staged :
+    val contentSplitted = getTuplesHashPath(sgitDirectory)
+    //1. Delete the file
+    //2. For each line in path :
+    contentSplitted.map { file =>
+      FileManager.delete(s"$sgitDirectory/${file._2}")
+      val blobContent =
+        Blobs.getContent(file._1, sgitDirectory).split("\n").toList
+      FileManager.createFile(
+        blobContent.head,
+        blobContent.tail.mkString,
+        sgitDirectory
+      )
+    }
+    //Get the blob, get the path,
+    //Extract content from blob
+    //Create file with blob content
+
   }
 }

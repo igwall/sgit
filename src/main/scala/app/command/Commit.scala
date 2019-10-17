@@ -3,9 +3,8 @@ import app.components.Stage
 import app.components.Head
 import app.components.Tree
 import app.command.Status
-import app.components.{FileManager,Log}
+import app.components.{FileManager, Log}
 import java.io.File
-
 
 object Commit {
 
@@ -20,7 +19,7 @@ object Commit {
     val stageLines = stageContent.split("\n").toList
     val contentToSave = prepareContent(stageLines, repoDirectory, sgitDirectory)
     if (contentToSave.isDefined) {
-      val name = "/"
+      val name = ""
       val olderCommit: String = Head.getLastCommit(sgitDirectory)
       val tree = Tree.createTree(name, contentToSave.get, sgitDirectory)
       val hash =
@@ -100,10 +99,10 @@ object Commit {
       * line 3 : (optionnal) message
       */
     val content =
-      s"oldCommit : $olderCommit\ntrees: $tree\nmessage: $message"
+      s"oldCommit:$olderCommit\ntrees:$tree\nmessage:$message"
     val path = s"${sgitDirectory}${File.separator}commits"
     FileManager.createFile(hash, content, path)
-    Log.update(sgitDirectory,s"$hash -- $message\n Author: Jonh Doe\n\n")
+    Log.update(sgitDirectory, s"$hash -- $message\n Author: Jonh Doe\n\n")
   }
 
   def extractContentLastCommit(sgitDirectory: String): String = {
@@ -116,10 +115,10 @@ object Commit {
   }
 
   def getTree(sgitDirectory: String, commitHash: String): String = {
-    val content = FileManager
+    FileManager
       .extractContentFromPath(s"$sgitDirectory/commits/$commitHash")
-      .split("\n")
-    content(1)
+      .split("\n")(1)
+      .split(":")(1)
 
   }
 
