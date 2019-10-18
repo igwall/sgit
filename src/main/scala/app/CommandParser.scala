@@ -85,9 +85,14 @@ case class CommandParser(params: Array[String]) {
     case "branch" =>
       val optionPath: Option[String] = Sgit.getRepoPath()
       val optionDirectory: Option[String] = Sgit.getSgitPath()
-      if (optionPath.isDefined && optionDirectory.isDefined) {
-        val sgitDirectory: String = optionDirectory.get
-        val repoDirectory: String = optionPath.get
+      val sgitDirectory: String = optionDirectory.get
+      val repoDirectory: String = optionPath.get
+      if (params.length == 2 && params(1) == "-av") {
+
+        val message = Branch.getAllBranches(sgitDirectory)
+        println(message)
+
+      } else if (params.length == 2 && !params(1).contains("-")) {
         val message = Branch.createBranch(params(1), sgitDirectory)
         if (message.isDefined) {
           println(message.get)
@@ -95,9 +100,10 @@ case class CommandParser(params: Array[String]) {
           println("fatal: Not a valid object name: 'master'.")
         }
       } else {
-        println("Error: It seems that your not in working directory")
+        println(
+          "This command doesn't exist.. Type sgit --help for more informations"
+        )
       }
-
     case _ =>
       println("Unknow command prompted...")
       println(Helper.getHelp)

@@ -15,6 +15,13 @@ class StageSpec extends FlatSpec with Matchers {
     finally {
       val repo = Sgit.getRepoPath().get
       if (new File(s"$repo/.sgit").exists()) FileManager.delete(s"$repo/.sgit")
+      if (!new File(s"$repo/src/test/testEnvironment/devandMaster.txt")
+            .exists())
+        FileManager.createFile(
+          "/src/test/testEnvironment/devandMaster.txt",
+          "i'm on dev and master",
+          repo
+        )
     }
   }
 
@@ -122,30 +129,33 @@ class StageSpec extends FlatSpec with Matchers {
     val repoDirectory = Sgit.getRepoPath().get
 
     // populate branch dev
-    val fileToAdd: String = "/src/test/testEnvironment/file1.txt"
+    val fileToAdd: String = "/src/test/testEnvironment/devandMaster.txt"
     val add = new AddCommand(fileToAdd, repoDirectory, sgitDirectory)
     add.addToStage()
     val commitCreated =
       Commit.create(sgitDirectory, "populate master", repoDirectory)
     val branchCreated = Branch.createBranch("dev", sgitDirectory)
+    if (branchCreated.isDefined) {
+      val devCOmmit = Branch.getCommitFromBranch(sgitDirectory, "dev")
+      println(commitCreated.get == devCOmmit)
+    }
 
-    FileManager.update(
-      "/src/test/testEnvironment/file1.txt",
-      "igwall is not there",
-      sgitDirectory
-    )
+    val fileToAdd2: String = "/src/test/testEnvironment/masteronlyfile.txt"
     val add2 = new AddCommand(fileToAdd, repoDirectory, sgitDirectory)
-    add2.addToStage()
+    val res = add2.addToStage()
+    println(s"second add : $res")
+    println(s"> Stage before second commit: ${Stage.getContent(sgitDirectory)}")
     Commit.create(sgitDirectory, "populate master again", repoDirectory)
+    println(s"> Stage after second commit: ${Stage.getContent(sgitDirectory)}")
 
+    Stage.deleteFilesInStage(sgitDirectory, repoDirectory)
     Branch.setCurrentBranch(sgitDirectory, "dev")
 
     val commitHash = Branch.getCommitFromBranch(sgitDirectory, "dev")
     val mainTree = Commit.getTree(sgitDirectory, commitHash)
     val contentFromhash = Stage.extractFromHash(sgitDirectory, mainTree)
     val newStage = Stage.createStageFromMainTree(sgitDirectory, mainTree)
-    println(Stage.importStage(sgitDirectory, newStage))
-
+    Stage.importStage(sgitDirectory, newStage)
   }
 
 }

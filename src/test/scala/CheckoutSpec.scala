@@ -45,9 +45,5 @@ class CheckoutSpec extends FlatSpec with Matchers {
     val sgitDirectory = Sgit.getSgitPath().get
     val repoDirectory = Sgit.getRepoPath().get
     val res = Checkout.doCheckOut(sgitDirectory, repoDirectory, "dev")
-    if (res.isDefined) {
-      println(res.get)
-    }
-
   }
 }

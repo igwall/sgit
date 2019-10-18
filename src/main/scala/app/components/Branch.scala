@@ -1,5 +1,6 @@
 package app.components
 import app.components.{FileManager, Head}
+import java.io.File
 
 object Branch {
 
@@ -54,5 +55,15 @@ object Branch {
     FileManager.extractContentFromPath(
       s"$sgitDirectory/branches/$branchName"
     )
+  }
+
+  def getAllBranches(sgitDirectory: String): String = {
+    val allFiles = new File(s"$sgitDirectory/branches/").listFiles().toList
+    allFiles
+      .map(
+        file => file.getCanonicalFile().toString().split("/").toList.last + "\n"
+      )
+      .mkString
+
   }
 }

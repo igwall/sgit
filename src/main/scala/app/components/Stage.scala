@@ -182,7 +182,6 @@ object Stage {
       trees.map { tree =>
         val contentOfTree = extractFromHash(sgitDirectory, tree)
         val path = contentOfTree._1
-        println(s"current path : <$currentPath>  path : <$path>")
         val trees = contentOfTree._2.map(_.trim).filterNot(_ == "")
         val blobs = contentOfTree._3.map(_.trim).filterNot(_ == "")
         val content = blobs.map { blob =>
@@ -215,8 +214,13 @@ object Stage {
       }.mkString
     }
     // Get the tree from commit Content
-    println(s"mainTree : <$mainTree>")
     createStage("", "", List(mainTree))
+  }
+
+  def deleteFilesInStage(sgitDirectory: String, repoDirectory: String) = {
+    val paths = getAllPath(sgitDirectory)
+    println(s"files to delete = ${paths.mkString}")
+    paths.map(path => FileManager.delete(s"${repoDirectory}$path"))
   }
 
   def extractFromHash(
@@ -237,13 +241,13 @@ object Stage {
     // Write the new content in stage file
     FileManager.delete(s"$sgitDirectory/STAGE")
     FileManager.createFile("STAGE", stage, sgitDirectory)
+    println(stage)
 
     //Change the content of all files staged :
     val contentSplitted = getTuplesHashPath(sgitDirectory)
     //1. Delete the file
     //2. For each line in path :
     contentSplitted.map { file =>
-      FileManager.delete(s"$sgitDirectory/${file._2}")
       val blobContent =
         Blobs.getContent(file._1, sgitDirectory).split("\n").toList
       FileManager.createFile(

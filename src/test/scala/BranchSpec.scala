@@ -46,4 +46,9 @@ class BranchSpec extends FlatSpec with Matchers {
     assert(!res.isDefined)
   }
 
+  it should "give all the branches" in {
+    val sgitDirectory = Sgit.getSgitPath().get
+    Branch.getAllBranches(sgitDirectory)
+  }
+
 }
