@@ -3,69 +3,58 @@ import java.io.File
 import scala.annotation.tailrec
 import app.command.Commit
 import app.components.{Tree, Blobs}
-object Stage {
-  // If the path is not written, add it to file
+
+case class Stage(
+    sgitDirectory: String,
+    workingDirectory: String,
+    content: String,
+    oldContent: String
+) {
+
   val separator = "::"
-  // Else, update the content
+  val contentByLines = content.split("\n").toList
+
+  // Return a new stage edited
   def addElement(
       hash: String,
       path: String,
       sgitDirectory: String,
       repoDirectory: String
-  ): Option[String] = {
-    val fullPath = repoDirectory + path
-    val stagePath = sgitDirectory + File.separator + "STAGE"
-    //Check that the STAGE file is at the good place
-    if (FileManager.exist(stagePath)) {
-      val contentStage = FileManager.extractContentFromPath(stagePath)
-      //If our path in already in stage, we only update blob hash
-      if (isInStage(path, stagePath)) {
-        val newContent = updateHash(hash, path, stagePath)
-        writeInStage(stagePath, newContent, sgitDirectory)
-        Some("File correctly added")
-      } else {
-        val newContent = contentStage + s"$hash ${Stage.separator} $path\n"
-        writeInStage(stagePath, newContent, sgitDirectory)
-        Some("File correctly added")
-      }
-      //Nothing to do, wrong directory.
+  ): Stage = {
+    val fullpath = s"$repoDirectory/$path"
+    //Check that the STAGE path is at the good place
+    //If our path in already in stage, we only update blob hash
+    if (isInStage(path)) {
+      val newContent = updateHash(hash, path)
+      new Stage(sgitDirectory, workingDirectory, newContent, oldContent)
     } else {
-      None
+      val newContent = content + s"$hash ${separator} $path\n"
+      new Stage(sgitDirectory, workingDirectory, newContent, oldContent)
     }
   }
 
-  // Check if a path given in parameter is already written in the stage
-  def isInStage(path: String, stagePath: String): Boolean = {
-    val contentOfStage = FileManager.extractContentFromPath(stagePath)
-    contentOfStage.contains(path)
+  def isInStage(path: String): Boolean = {
+    content.contains(path)
   }
 
   // Function that take a path in argument and a hash.
   // Check if the hash is the same for the path given in parameter.
   // If it is, replace the hash, else do nothing
-  def updateHash(hash: String, path: String, stagePath: String): String = {
+  def updateHash(hash: String, path: String): String = {
     //We check that the path is correctly staged before editing it
-    val contentOfStage = FileManager.extractContentFromPath(stagePath)
-    contentOfStage
+    content
       .split("\n") // => Splitted by line
       .filter(line => !line.contains(path))
       .map(line => line + "\n") // => get all path expect the one that we want to edit
-      .mkString + s"$hash ${Stage.separator} $path\n" // => add the new hash with the path to stage
+      .mkString + s"$hash ${separator} $path\n" // => add the new hash with the path to stage
   }
 
-  def writeInStage(
-      stagePath: String,
-      contentStage: String,
-      sgitDirectory: String
-  ): Unit = {
-    FileManager.delete(stagePath)
-    FileManager.createFile("STAGE", contentStage, sgitDirectory)
-  }
-
-  def readStage(sgitDirectory: String): String = {
-    return FileManager.extractContentFromPath(
-      s"${sgitDirectory}${File.separator}STAGE"
-    )
+  // WRITE FILES
+  def save(): Unit = {
+    FileManager.delete(getPath(sgitDirectory))
+    FileManager.createFile("STAGE", content, sgitDirectory)
+    FileManager.delete(s"$sgitDirectory/.old/STAGE.old")
+    FileManager.createFile("STAGE.old", oldContent, s"$sgitDirectory/.old")
   }
 
   def getPath(sgitDirectory: String): String = {
@@ -76,76 +65,42 @@ object Stage {
     path drop projectDirectory.size
   }
 
-  def getContent(sgitDirectory: String): String = {
-    FileManager
-      .extractContentFromPath(Stage.getPath(sgitDirectory))
-  }
-
-  def delete(sgitDirectory: String, path: String) {
-
-    val contentOfStage =
-      FileManager.extractContentFromPath(
-        s"${sgitDirectory}${File.separator}STAGE"
-      )
-    contentOfStage
+  def delete(path: String): String = {
+    content
       .split("\n") // => Splitted by line
       .filter(line => !line.contains(path))
       .map(line => line + "\n") // => get all path expect the one that we want to edit
       .mkString
   }
 
-  // Check that the path given is in stage
-  def contains(path: String, sgitDirectory: String): Boolean = {
-    val content = getContent(sgitDirectory)
-    content.contains(path)
-  }
-
-  // Save the STAGE
-  def backup(sgitDirectory: String) {
-    val path =
-      s"${sgitDirectory}${File.separator}.old${File.separator}STAGE.old"
-    if (FileManager.exist(path)) {
-      FileManager.delete(path)
-    }
-    FileManager.createFile(
-      "STAGE.old",
-      Stage.getContent(sgitDirectory),
-      s"${sgitDirectory}${File.separator}.old"
-    )
-  }
-
-  // Give the content of the ols Stage
-  def getOldStage(sgitDirectory: String): String = {
-    FileManager.extractContentFromPath(
-      s"${sgitDirectory}${File.separator}.old${File.separator}STAGE.old"
-    )
-  }
-
-  def getAllPath(sgitDirectory: String): List[String] = {
-    Stage
-      .readStage(sgitDirectory)
+  def getAllBlobs(): List[String] = {
+    content
       .split("\n")
       .toList
       .flatMap(
-        _.split(s" ${Stage.separator} ").toList
-          .filter(_.contains("/"))
-      )
-  }
-
-  def getAllBlobs(sgitDirectory: String): List[String] = {
-    Stage
-      .readStage(sgitDirectory)
-      .split("\n")
-      .toList
-      .flatMap(
-        _.split(s" ${Stage.separator} ").toList
+        _.split(s" ${separator} ").toList
           .filter(!_.contains("/"))
       )
   }
 
-  def getTuplesHashPath(sgitDirectory: String): List[(String, String)] = {
-    val blobs = Stage.getAllBlobs(sgitDirectory)
-    val paths = Stage.getAllPath(sgitDirectory)
+  // Check that the path given is in stage
+  def contains(path: String): Boolean = {
+    content.contains(path)
+  }
+
+  def getAllPath(): List[String] = {
+    content
+      .split("\n")
+      .toList
+      .flatMap(
+        _.split(s" ${separator} ").toList
+          .filter(_.contains("/"))
+      )
+  }
+
+  def getTuplesHashPath(): List[(String, String)] = {
+    val blobs = getAllBlobs()
+    val paths = getAllPath()
 
     @tailrec
     def createTuple(
@@ -163,12 +118,18 @@ object Stage {
     createTuple(blobs, paths, List())
   }
 
-  def getMappingHash(sgitDirectory: String): List[String] = {
-    val stage = Stage.getContent(sgitDirectory)
-    stage.split("\n").toList
+}
+object Stage {
 
+  // I/O => Get content from files
+  def apply(sgitDirectory: String, workingDirectory: String): Stage = {
+    val content = FileManager.extractContentFromPath(s"$sgitDirectory/STAGE")
+    val oldContent =
+      FileManager.extractContentFromPath(s"$sgitDirectory/.old/STAGE.old")
+    new Stage(sgitDirectory, workingDirectory, content, oldContent)
   }
 
+  /*
   def createStageFromMainTree(
       sgitDirectory: String,
       mainTree: String
@@ -217,6 +178,8 @@ object Stage {
     createStage("", "", List(mainTree))
   }
 
+
+  // I/O Function => Delete real files
   def deleteFilesInStage(sgitDirectory: String, repoDirectory: String) = {
     val paths = getAllPath(sgitDirectory)
     println(s"files to delete = ${paths.mkString}")
@@ -259,6 +222,6 @@ object Stage {
     //Get the blob, get the path,
     //Extract content from blob
     //Create file with blob content
-
   }
+ */
 }

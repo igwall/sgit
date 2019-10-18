@@ -12,7 +12,7 @@ case class Tree(
     val content =
       s"- ${name}\n- ${trees.mkString(",")}\n- ${blobs.mkString(",")}\n"
     val fileName = hash
-    val path = s"${sgitRepository}${File.separator}trees"
+    val path = s"${sgitRepository}/trees"
     FileManager.createFile(fileName, content, path)
   }
 
@@ -22,6 +22,16 @@ case class Tree(
 }
 
 object Tree {
+  def apply(
+      name: String,
+      contentToSave: List[List[String]],
+      sgitDirectory: String
+  )  : Tree =  {
+
+
+
+  }
+
   def createTree(
       fileName: String,
       paths: List[List[String]],
@@ -51,7 +61,5 @@ object Tree {
     tree.save()
     tree
   }
-
-  
 //TODO WORK ON PERSISTANT FILE OF TREE
 }

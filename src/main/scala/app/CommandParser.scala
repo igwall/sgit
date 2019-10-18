@@ -1,8 +1,8 @@
 package app.command
 import app.command.{Initializer, AddCommand, Helper}
-import app.components.Sgit
-import app.components.Branch
+import app.components.{Sgit, Stage, Branch, Blobs}
 import app.command.Diff
+import java.io.File
 
 /**
   * Class that parse arguments given in parameter and dispatch actions to the right behavior class.
@@ -28,9 +28,14 @@ case class CommandParser(params: Array[String]) {
       if (optionPath.isDefined && optionDirectory.isDefined) {
         val workingDirectory: String = optionPath.get
         val sgitDirectory: String = optionDirectory.get
-        val add = new AddCommand(params(1), workingDirectory, sgitDirectory)
-        val status = add.addToStage()
-        if (status.isEmpty) {
+        if (new File(s"$workingDirectory/${params(1)}").exists) {
+          val stage = Stage(sgitDirectory, workingDirectory)
+          val blob = Blobs(sgitDirectory, workingDirectory, params(1))
+          blob.save
+          val add = AddCommand(sgitDirectory, workingDirectory)
+          val newStage = add.addToStage(params(1), stage, blob)
+          newStage.save()
+        } else {
           println(
             "${Console.RED}Error: Cannot add this file to repository${Console.RESET}"
           )

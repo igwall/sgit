@@ -2,59 +2,55 @@ package app.components
 import app.components.{FileManager, Head}
 import java.io.File
 
+case class Branch(
+    sgitDirectory: String,
+    branchName: String,
+    lastCommit: String
+) {
+  val branchPath = s"$sgitDirectory/branches/$branchName"
+
+  def save() {
+    FileManager.delete(branchPath)
+    FileManager.createFile(
+      branchName,
+      lastCommit,
+      s"$sgitDirectory/branches/"
+    )
+  }
+  // Return a new branch that will be saved
+  def update(commitHash: String): Branch = {
+    new Branch(sgitDirectory, branchName, commitHash)
+  }
+}
 object Branch {
 
-  def createBranch(name: String, sgitDirectory: String): Option[String] = {
-    val lastCommit = Head.getLastCommit(sgitDirectory)
+  def getBranch(sgitDirectory: String, branchName: String): Branch = {
+    new Branch(
+      sgitDirectory,
+      branchName,
+      FileManager.extractContentFromPath(s"$sgitDirectory/branches/$branchName")
+    )
+  }
+
+  def createBranch(
+      name: String,
+      sgitDirectory: String,
+      head: Head
+  ): Option[String] = {
     // If we don't have any commit existing yet
-    if (lastCommit.isEmpty()) {
+    if (head.content.isEmpty()) {
       return None
     } else {
       val message =
-        FileManager.createFile(name, lastCommit, getPath(sgitDirectory))
+        FileManager.createFile(name, head.content, s"$sgitDirectory/branches")
       if (message.isDefined) Some("Branch correctly created")
       else Some("Branch already existing")
     }
   }
 
-  def getPath(sgitDirectory: String): String = {
-    sgitDirectory + "/branches/"
-  }
-
-  def getCurrentBranch(sgitDirectory: String): String = {
-    FileManager.extractContentFromPath(s"$sgitDirectory/BRANCH")
-  }
-
   def setCurrentBranch(sgitDirectory: String, branchName: String) = {
-    val branchPath = sgitDirectory + "/branches/" + getCurrentBranch(
-      sgitDirectory
-    )
-    FileManager.delete(branchPath)
+    FileManager.delete(s"$sgitDirectory/BRANCH")
     FileManager.createFile("BRANCH", branchName, sgitDirectory)
-  }
-
-  def update(sgitDirectory: String, content: String) = {
-    val branchPath = sgitDirectory + "/branches/" + getCurrentBranch(
-      sgitDirectory
-    )
-    FileManager.delete(branchPath)
-    FileManager.createFile(
-      getCurrentBranch(sgitDirectory),
-      content,
-      s"$sgitDirectory/branches/"
-    )
-  }
-
-  def getLastCommit(sgitDirectory: String): String = {
-    val currentBranch = getCurrentBranch(sgitDirectory)
-    FileManager.extractContentFromPath(
-      s"$sgitDirectory/branches/$currentBranch"
-    )
-  }
-  def getCommitFromBranch(sgitDirectory: String, branchName: String): String = {
-    FileManager.extractContentFromPath(
-      s"$sgitDirectory/branches/$branchName"
-    )
   }
 
   def getAllBranches(sgitDirectory: String): String = {
@@ -64,6 +60,5 @@ object Branch {
         file => file.getCanonicalFile().toString().split("/").toList.last + "\n"
       )
       .mkString
-
   }
 }

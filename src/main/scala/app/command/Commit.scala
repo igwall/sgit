@@ -1,12 +1,18 @@
 package app.command
 import app.components.Stage
-import app.components.Head
 import app.components.Tree
 import app.command.Status
-import app.components.{FileManager, Log}
+import app.components.{FileManager, Log, Head}
 import java.io.File
 
-object Commit {
+case class Commit(
+    sgitDirectory: String,
+    workingDirectory: String,
+    stage: Stage,
+    log: Log,
+    head: Head,
+    message: String
+) {
 
   def create(
       sgitDirectory: String,
@@ -14,13 +20,12 @@ object Commit {
       repoDirectory: String
   ): Option[String] = {
     //Prepare all the trees to save
-    val stageContent = Stage.readStage(sgitDirectory)
-    Stage.backup(sgitDirectory)
-    val stageLines = stageContent.split("\n").toList
-    val contentToSave = prepareContent(stageLines, repoDirectory, sgitDirectory)
+
+    val contentToSave =
+      prepareContent(stage.contentByLines)
     if (contentToSave.isDefined) {
       val name = ""
-      val olderCommit: String = Head.getLastCommit(sgitDirectory)
+      val olderCommit: String = head.content
       val tree = Tree.createTree(name, contentToSave.get, sgitDirectory)
       val hash =
         FileManager.createHash(name + contentToSave.mkString + sgitDirectory)
@@ -33,9 +38,7 @@ object Commit {
   }
 
   def prepareContent(
-      listOfStageLines: List[String],
-      workingDirectory: String,
-      sgitDirectory: String
+      listOfStageLines: List[String]
   ): Option[List[List[String]]] = {
     //On doit mettre le path.split + hash
     //val contentCleaned = deleteFilesCheck(listOfStageLines, repoDirectory, sgitDirectory)
@@ -44,30 +47,28 @@ object Commit {
     } else {
       Some(
         listOfStageLines
-          .map(elem => transformPathLine(elem.split(s" ${Stage.separator} ")))
+          .map(elem => transformPathLine(elem.split(s" ${stage.separator} ")))
           .toList
       )
     }
-  }
-
-  def deleteFilesCheck(
-      listOfStageLines: List[String],
-      workingDirectory: String,
-      sgitDirectory: String
-  ): List[String] = {
-    val deleteBlankLine = listOfStageLines.filter(line => line != "")
-    val file = deleteBlankLine.map { line =>
-      val split = line.split(s" ${Stage.separator} ")
-      println(split(0) + "," + split(1))
-      (split(0), split(1))
-    }
-    deleteTraitment(sgitDirectory, file)
   }
 
   def transformPathLine(line: Array[String]): List[String] = {
     val pathSplitted = line(1).split("/").toList
     val cleanedPathSplitted = pathSplitted.filter(path => path.size > 0)
     cleanedPathSplitted.dropRight(1) :+ line(0) //We replace the name of the file with is hash
+  }
+
+  def deleteFilesCheck(
+      listOfStageLines: List[String]
+  ): List[String] = {
+    val deleteBlankLine = listOfStageLines.filter(line => line != "")
+    val file = deleteBlankLine.map { line =>
+      val split = line.split(s" ${stage.separator} ")
+      println(split(0) + "," + split(1))
+      (split(0), split(1))
+    }
+    deleteTraitment(sgitDirectory, file)
   }
 
   def deleteTraitment(
@@ -89,9 +90,6 @@ object Commit {
       message: String,
       sgitDirectory: String
   ) {
-    //Save new commit hash on HEAD
-    Head.update(hash, sgitDirectory)
-
     //Save informations about commit in /commits
     /**
       * line 1 : parent Commit
@@ -100,13 +98,35 @@ object Commit {
       */
     val content =
       s"oldCommit:$olderCommit\ntrees:$tree\nmessage:$message"
-    val path = s"${sgitDirectory}${File.separator}commits"
+    val path = s"${sgitDirectory}/commits"
     FileManager.createFile(hash, content, path)
-    Log.update(sgitDirectory, s"$hash -- $message\n Author: Jonh Doe\n\n")
+
+    //Save new commit hash on HEAD
+    val newHead = head.update(hash, sgitDirectory)
+
+    // Save new version of Log  :
+    val newlog =
+      log.update(s"$hash -- $message\n Author: Jonh Doe\n\n")
+    newlog.save()
   }
 
+}
+object Commit {
+
+  def apply(
+      sgitDirectory: String,
+      workingDirectory: String,
+      message: String
+  ) {
+    val stage = Stage(sgitDirectory, workingDirectory)
+    val log = Log(sgitDirectory)
+    val head = Head(sgitDirectory)
+    new Commit(sgitDirectory, workingDirectory, stage, log, head, message)
+  }
+
+
   def extractContentLastCommit(sgitDirectory: String): String = {
-    val commit = Head.getLastCommit(sgitDirectory)
+    val commit = FileManager.extractContentFromPath(s"$sgitDirectory/HEAD")
     FileManager.extractContentFromPath(s"$sgitDirectory/commits/$commit")
   }
 
@@ -119,7 +139,6 @@ object Commit {
       .extractContentFromPath(s"$sgitDirectory/commits/$commitHash")
       .split("\n")(1)
       .split(":")(1)
-
   }
 
 }

@@ -1,43 +1,62 @@
 package app.components
 import app.components.{Sgit, FileManager}
-import java.io.File
+import java.security.MessageDigest
 
-object Blobs {
-  //Path : String or Paths ?
-  //Return the hash of the String
+case class Blobs(
+    sgitDirectory: String,
+    content: String,
+    filePath: String
+) {
 
-  def createBlob(
-      fileToBlob: String,
-      sgitDirectory: String
-  ): Option[String] = {
+  val hash = createHash(content + filePath)
+  val fileName = filePath.split("/").toList.last
+  def save(): Option[String] = {
 
-    if (new File(fileToBlob).exists()) {
-      val pathSplit = fileToBlob.split("/")
-      val fileName = pathSplit(pathSplit.size - 1)
-      val contentFile: String =
-        s"$fileName\n${FileManager.extractContentFromPath(fileToBlob)}"
-      val hashFileName: String = FileManager.createHash(contentFile)
-      val blobDirectory = sgitDirectory + File.separator + "blobs"
-      // Nomme le fichier avec le hash
-      FileManager.createFile(hashFileName, contentFile, blobDirectory)
-      // Copy le contenu dans le fichier
-      //Retourne le hash
+    val hashFileName: String = createHash(content + filePath)
+
+    val blobDirectory = s"$sgitDirectory/blobs"
+    // Nomme le fichier avec le hash
+    val res = FileManager.createFile(
+      hashFileName,
+      s"$fileName\n$content",
+      blobDirectory
+    )
+    // Copy le contenu dans le fichier
+    //Retourne le hash
+    if (res.isDefined) {
       return Some(hashFileName)
     } else {
-      return None
+      None
     }
-
   }
 
-  def extractName(sgitDirectory: String, blobHash: String): String = {
-    val blob =
+  def createHash(content: String): String = {
+    MessageDigest
+      .getInstance("SHA-1")
+      .digest(content.getBytes("UTF-8"))
+      .map("%02x".format(_))
+      .mkString
+  }
+
+}
+object Blobs {
+
+  def apply(
+      sgitDirectory: String,
+      workingDirectory: String,
+      filePath: String
+  ): Blobs = {
+    val content =
+      FileManager.extractContentFromPath(s"$workingDirectory/$filePath")
+    new Blobs(sgitDirectory, content, filePath)
+  }
+
+  def getFromHash(sgitDirectory: String, blobHash: String): Blobs = {
+    val export =
       FileManager.extractContentFromPath(sgitDirectory + "/blobs/" + blobHash)
-    blob.split("\n")(0)
-  }
-
-  def getContent(hash: String, sgitDirectory: String): String = {
-    val fullPath = s"$sgitDirectory/blobs/$hash"
-    FileManager.extractContentFromPath(fullPath)
+    val name = export.split("\n")(0)
+    val content = export.split("\n").toList.tail.mkString
+    new Blobs(sgitDirectory, content, name)
   }
 
 }
