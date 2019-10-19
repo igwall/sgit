@@ -11,10 +11,17 @@ case class AddCommand(
   def addToStage(file: String, stage: Stage, blob: Blobs): Stage = {
     // Check if the file that we want to add is in the same path than the .sgit project
     //If the blob is correctly created
-    stage.addElement(
-      blob.hash,
-      file
-    )
+    if (file.head != '/') {
+      stage.addElement(
+        blob.hash,
+        s"/$file"
+      )
+    } else {
+      stage.addElement(
+        blob.hash,
+        file
+      )
+    }
 
   }
 }

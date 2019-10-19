@@ -13,7 +13,7 @@ case class Tree(
   // Reccursively save content
   def save() {
     val content =
-      s"- ${name}\n- ${trees.mkString(",")}\n- ${blobs.mkString(",")}\n"
+      s"- ${name}\n- ${trees.map(tree => tree.hash).mkString(",")}\n- ${blobs.mkString(",")}\n"
     val fileName = hash
     val path = s"${sgitRepository}/trees"
     FileManager.createFile(fileName, content, path)
