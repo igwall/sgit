@@ -3,21 +3,23 @@ import java.io.File
 
 case class Tree(
     name: String,
-    trees: List[String],
+    trees: List[Tree],
     blobs: List[String],
     sgitRepository: String
 ) {
 
+  val hash: String =
+    FileManager.createHash(name + trees.mkString + blobs.mkString)
+
+  // Reccursively save content
   def save() {
     val content =
       s"- ${name}\n- ${trees.mkString(",")}\n- ${blobs.mkString(",")}\n"
     val fileName = hash
     val path = s"${sgitRepository}/trees"
     FileManager.createFile(fileName, content, path)
+    trees.map(tree => tree.save())
   }
-
-  val hash: String =
-    FileManager.createHash(name + trees.mkString + blobs.mkString)
 
 }
 
@@ -26,10 +28,8 @@ object Tree {
       name: String,
       contentToSave: List[List[String]],
       sgitDirectory: String
-  )  : Tree =  {
-
-
-
+  ): Tree = {
+    createTree(name, contentToSave, sgitDirectory)
   }
 
   def createTree(
@@ -54,11 +54,10 @@ object Tree {
 
     val tree = new Tree(
       fileName,
-      subTrees.map(elem => elem.hash),
+      subTrees,
       blobs.flatten,
       sgitDirectory
     )
-    tree.save()
     tree
   }
 //TODO WORK ON PERSISTANT FILE OF TREE

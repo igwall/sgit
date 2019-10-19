@@ -12,19 +12,17 @@ case class Blobs(
   val fileName = filePath.split("/").toList.last
   def save(): Option[String] = {
 
-    val hashFileName: String = createHash(content + filePath)
-
     val blobDirectory = s"$sgitDirectory/blobs"
     // Nomme le fichier avec le hash
     val res = FileManager.createFile(
-      hashFileName,
+      hash,
       s"$fileName\n$content",
       blobDirectory
     )
     // Copy le contenu dans le fichier
     //Retourne le hash
     if (res.isDefined) {
-      return Some(hashFileName)
+      return Some(hash)
     } else {
       None
     }

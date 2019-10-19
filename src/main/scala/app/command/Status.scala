@@ -1,13 +1,42 @@
 package app.command
-import app.components.Stage
-import app.components.FileManager
+import app.components.{Stage, Blobs, FileManager}
 
-object Status {
-  def getStatus(sgitDirectory: String, workingDirectory: String): String = {
-    val changesToCommit = getchangesToBeCommited(sgitDirectory)
-    val untrackedFiles = getUntrackedFiles(sgitDirectory, workingDirectory)
+case class Status(
+    stage: Stage,
+    // (path, fakeBlob) => fakeBlob is a blob from real content and not the one in stage
+    allFilesPathContentBlob: List[(String, Blobs)]
+) {
+
+  def getUntrackedFiles(): String = {
+    val res = allFilesPathContentBlob.filter(file => !stage.contains(file._1))
+    res.filter(line => line != "").map(elem => s"-  $elem \n").mkString
+  }
+
+  def getchangesToBeCommited(): String = {
+    // Get all the files added between two commits
+    stage
+      .newFiles()
+      .filter(path => path.size > 0)
+      .map(path => s"-  $path\n")
+      .mkString
+  }
+
+  def getFilesStagedButEdited(): String = {
+    val filtered = allFilesPathContentBlob
+      .filter(
+        elem =>
+          !stage
+            .contains(s"${elem._2.hash} ${stage.separator} ${elem._1}")
+      )
+      .filter(elem => elem._1.size > 0)
+    filtered.map(elem => s"-  ${elem._1}\n").mkString
+  }
+
+  def getStatus(): String = {
+    val changesToCommit = getchangesToBeCommited()
+    val untrackedFiles = getUntrackedFiles()
     val filesStagedButEdited =
-      getFilesStagedButEdited(sgitDirectory, workingDirectory)
+      getFilesStagedButEdited()
     s"""
     ${Console.YELLOW}
     \rEdited files :
@@ -24,57 +53,21 @@ object Status {
     """
   }
 
-  // Return all the files in repo but not in stage (all - stage)
-  def getUntrackedFiles(
-      sgitDirectory: String,
-      workingDirectory: String
-  ): String = {
-    val allFiles =
+}
+object Status {
+  def apply(sgitDirectory: String, workingDirectory: String): Status = {
+    val stage: Stage = Stage(sgitDirectory, workingDirectory)
+    val allFilesPaths =
       FileManager.getAllFilesFromPath(workingDirectory, workingDirectory)
-    val stageContent = Stage.getContent(sgitDirectory)
-    val res = allFiles.filter(file => !Stage.contains(file, sgitDirectory))
-    res.filter(line => line != "").map(elem => s"-  $elem \n").mkString
-  }
 
-  // Get all the files that weren't in the previous commit but added now
-  def getchangesToBeCommited(sgitDirectory: String): String = {
-    // Get all the files added between two commits
-    val currentStage = Stage.getAllPath(sgitDirectory)
-    val oldStagePath = Stage.getOldStage(sgitDirectory)
-    val newFiles = currentStage.filter(path => !oldStagePath.contains(path))
-    newFiles
-      .filter(path => path.size > 0)
-      .map(path => s"-  $path\n")
-      .mkString
-  }
-
-  // Get all the files that are in stage but their "optentially hash" is different from now
-  def getFilesStagedButEdited(
-      sgitDirectory: String,
-      workingDirectory: String
-  ): String = {
-    val stage = Stage.getContent(sgitDirectory)
-    val paths = Stage.getAllPath(sgitDirectory)
-    val tuples = paths.map { path =>
-      (
-        path,
-        FileManager.createHash(
-          FileManager.extractContentFromPath(workingDirectory + path)
+    val allFilesPathsAndContent = allFilesPaths.map(
+      path =>
+        (
+          path,
+          Blobs(sgitDirectory, workingDirectory, workingDirectory + path)
         )
-      )
-    }
-    val filesEdited = tuples
-      .filter(
-        elem => !stage.contains(s"${elem._2} ${Stage.separator} ${elem._1}")
-      )
-      .filter(elem => elem._1.size > 0)
-    filesEdited.map(elem => s"-  ${elem._1}\n").mkString
-  }
-
-  // Return stage content
-  def getTrackedFiles(sgitDirectory: String): List[String] = {
-    // SUBSTAIN HASH !!
-    Stage.readStage(sgitDirectory).split("\n").toList
+    )
+    new Status(stage, allFilesPathsAndContent)
   }
 
 }

@@ -1,6 +1,6 @@
 package app.command
 import app.command.{Initializer, AddCommand, Helper}
-import app.components.{Sgit, Stage, Branch, Blobs}
+import app.components.{Sgit, Stage, Branch, Blobs, Head}
 import app.command.Diff
 import java.io.File
 
@@ -22,6 +22,7 @@ case class CommandParser(params: Array[String]) {
           s"${Console.RED_B}Error: already existing directory: .sgit${Console.RESET}"
         )
       }
+
     case "add" =>
       val optionPath: Option[String] = Sgit.getRepoPath()
       val optionDirectory: Option[String] = Sgit.getSgitPath()
@@ -55,10 +56,12 @@ case class CommandParser(params: Array[String]) {
         //If the user give a message
         if (params.length == 3) {
           if (params(1) == "-m") {
-            Commit.create(sgitDirectory, params(2), repoDirectory)
+            val commit = Commit(sgitDirectory, repoDirectory, params(2))
+            commit.save
           }
         } else {
-          Commit.create(sgitDirectory, " ", repoDirectory)
+          val commit = Commit(sgitDirectory, repoDirectory, "Default message")
+          commit.save
         }
 
       } else {
@@ -71,7 +74,8 @@ case class CommandParser(params: Array[String]) {
       if (optionPath.isDefined && optionDirectory.isDefined) {
         val sgitDirectory: String = optionDirectory.get
         val repoDirectory: String = optionPath.get
-        val message = Status.getStatus(sgitDirectory, repoDirectory)
+        val status = Status(sgitDirectory, repoDirectory)
+        val message = status.getStatus()
         println(message)
       } else {
         println("Error: It seems that your not in sgit project")
@@ -82,8 +86,9 @@ case class CommandParser(params: Array[String]) {
       if (optionPath.isDefined && optionDirectory.isDefined) {
         val sgitDirectory: String = optionDirectory.get
         val repoDirectory: String = optionPath.get
-        val message = Diff.getDiff(sgitDirectory, repoDirectory)
-        println(message)
+        val diff = Diff(sgitDirectory, repoDirectory)
+        val res = diff.listOfDiff()
+        println(res)
       } else {
         println("Error: It seems that your not in working directory")
       }
@@ -98,7 +103,8 @@ case class CommandParser(params: Array[String]) {
         println(message)
 
       } else if (params.length == 2 && !params(1).contains("-")) {
-        val message = Branch.createBranch(params(1), sgitDirectory)
+        val head = Head(sgitDirectory)
+        val message = Branch.createBranch(params(1), sgitDirectory, head)
         if (message.isDefined) {
           println(message.get)
         } else {

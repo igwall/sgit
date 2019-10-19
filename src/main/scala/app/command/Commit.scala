@@ -14,11 +14,7 @@ case class Commit(
     message: String
 ) {
 
-  def create(
-      sgitDirectory: String,
-      message: String,
-      repoDirectory: String
-  ): Option[String] = {
+  def save(): Option[String] = {
     //Prepare all the trees to save
 
     val contentToSave =
@@ -28,8 +24,22 @@ case class Commit(
       val olderCommit: String = head.content
       val tree = Tree.createTree(name, contentToSave.get, sgitDirectory)
       val hash =
+        // Not an I/O => RT Function createHash
         FileManager.createHash(name + contentToSave.mkString + sgitDirectory)
-      save(hash, olderCommit, tree.hash, message, sgitDirectory)
+
+      val content =
+        s"oldCommit:$olderCommit\ntrees:$tree\nmessage:$message"
+      val path = s"${sgitDirectory}/commits"
+      FileManager.createFile(hash, content, path)
+
+      //Save new commit hash on HEAD
+      head.update(hash, sgitDirectory)
+
+      // Save new version of Log  :
+      val newlog =
+        log.update(s"$hash -- $message\n Author: Jonh Doe\n\n")
+      newlog.save()
+
       Some(hash)
     } else {
       None
@@ -59,6 +69,7 @@ case class Commit(
     cleanedPathSplitted.dropRight(1) :+ line(0) //We replace the name of the file with is hash
   }
 
+  /*
   def deleteFilesCheck(
       listOfStageLines: List[String]
   ): List[String] = {
@@ -80,35 +91,8 @@ case class Commit(
     res._2.map(elem => Stage.delete(sgitDirectory, elem._2))
     // Call the stage to delete path
     res._1.map(tuple => tuple._2.toString())
-
   }
-
-  def save(
-      hash: String,
-      olderCommit: String,
-      tree: String,
-      message: String,
-      sgitDirectory: String
-  ) {
-    //Save informations about commit in /commits
-    /**
-      * line 1 : parent Commit
-      * line 2 : parent tree
-      * line 3 : (optionnal) message
-      */
-    val content =
-      s"oldCommit:$olderCommit\ntrees:$tree\nmessage:$message"
-    val path = s"${sgitDirectory}/commits"
-    FileManager.createFile(hash, content, path)
-
-    //Save new commit hash on HEAD
-    val newHead = head.update(hash, sgitDirectory)
-
-    // Save new version of Log  :
-    val newlog =
-      log.update(s"$hash -- $message\n Author: Jonh Doe\n\n")
-    newlog.save()
-  }
+ */
 
 }
 object Commit {
@@ -117,13 +101,12 @@ object Commit {
       sgitDirectory: String,
       workingDirectory: String,
       message: String
-  ) {
+  ): Commit = {
     val stage = Stage(sgitDirectory, workingDirectory)
     val log = Log(sgitDirectory)
     val head = Head(sgitDirectory)
     new Commit(sgitDirectory, workingDirectory, stage, log, head, message)
   }
-
 
   def extractContentLastCommit(sgitDirectory: String): String = {
     val commit = FileManager.extractContentFromPath(s"$sgitDirectory/HEAD")

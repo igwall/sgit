@@ -6,37 +6,25 @@ import app.components.Stage
 import app.components.Blobs
 import app.components.FileManager
 
-object Diff {
-  // Main method for the command
-  def getDiff(sgitDirectory: String, repoDirectory: String): String = {
+case class Diff(
+    sgitDirectory: String,
+    workingDirectory: String,
+    contentBlobAndPath: List[(List[String], List[String])] ){
 
-    // Récupérer le stage
-    listOfDiff(sgitDirectory, repoDirectory).mkString
-    // Récupérer le path pour dire qu'on fait le diff la dessus : /src/xxx.txt et avec les diffs en deesous
-    // Séparer les blobs des paths
-    // Pour chaque Blob et chaque path (Dans un map)
-  }
 
-  def listOfDiff(sgitDirectory: String, repoDirectory: String): List[String] = {
 
-    // Récupérer le stage
-    val hashAndPath = Stage.getTuplesHashPath(sgitDirectory)
-    hashAndPath.map { hashAndPath =>
-      makeDiff(
-        Blobs.getContent(hashAndPath._1, sgitDirectory).split("\n").toList,
-        FileManager
-          .extractContentFromShortenPath(hashAndPath._2, repoDirectory)
-          .split("\n")
-          .toList
-      )
+  def listOfDiff(): List[String] = {
+    contentBlobAndPath.map {
+      case (blobFile, realFile) => makeDiff(blobFile, realFile)
     }
     // Récupérer le path pour dire qu'on fait le diff la dessus : /src/xxx.txt et avec les diffs en deesous
     // Séparer les blobs des paths
     // Pour chaque Blob et chaque path (Dans un map)
   }
 
-  // Main part of the "diff" algorithm between two files
-  def makeDiff(
+
+
+def makeDiff(
       oldFile: List[String],
       newFile: List[String]
   ): String = {
@@ -249,5 +237,31 @@ object Diff {
       else s"\r${Console.RED}${value._1} ${value._2}${Console.RESET}\n"
     }.mkString
   }
+
+}
+
+
+object Diff {
+  def apply(sgitDirectory: String, workingDirectory: String): Diff = {
+    val stage = Stage(sgitDirectory, workingDirectory)
+    val hashAndPath = stage.getTuplesHashPath()
+    val contentBlobAndPath = hashAndPath.map { hashAndPath =>
+      (
+        Blobs
+          .getFromHash(hashAndPath._1, sgitDirectory)
+          .content
+          .split("\n")
+          .toList,
+        FileManager
+          .extractContentFromShortenPath(hashAndPath._2, workingDirectory)
+          .split("\n")
+          .toList
+      )
+    }
+    new Diff(sgitDirectory, workingDirectory, contentBlobAndPath)
+  }
+
+  // Main part of the "diff" algorithm between two files
+  
 
 }

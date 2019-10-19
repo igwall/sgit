@@ -37,6 +37,11 @@ case class Stage(
     content.contains(path)
   }
 
+  def newFiles(): List[String] = {
+    val contentList = getAllPath()
+    contentList.filter(path => !oldContent.contains(path))
+  }
+
   // Function that take a path in argument and a hash.
   // Check if the hash is the same for the path given in parameter.
   // If it is, replace the hash, else do nothing

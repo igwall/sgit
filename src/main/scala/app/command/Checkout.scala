@@ -2,7 +2,7 @@ package app.command
 import app.command.{Commit, Diff}
 import app.components.{Branch, Stage}
 object Checkout {
-
+  /*
   //Détruire tous les fichiers (A NE SURTOUT PAS FAIRE COMME UN MONGOL EN TEST)
   // FAire la fonction de reconstruction réccursive à partir du commit
   def doCheckOut(
@@ -31,5 +31,5 @@ object Checkout {
     // +> Pour tous mes fihciers untracked, vérifier qu'ils ne sont pas dans le stage !
 
   }
-
+ */
 }
