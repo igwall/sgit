@@ -1,5 +1,13 @@
 # sgit project
 
+👨‍💻 
+| - http://igwall.fr
+| - https://www.linkedin.com/in/igwall/
+
+#### Resume :
+This project is a clone like of git, a code versioning tool (and more generally a file versioning tool) made during the month of October 2019. 
+
+
 #### Upgrades in progress : 
 - ✅ Init
 - ✅ Parser 
@@ -10,11 +18,6 @@
 - ✅ Log
 - ✅ Help
 - 🕓 Checkout
-
-
-
-#### Resume :
-This project is a clone like of git, a code versioning tool (and more generally a file versioning tool) made during the month of October 2019. 
 
 #### Installation (manual) :
 > This Scala project use the `sbt assembly` so please make sure that you've installed `sbt` before using it. The scala version used is  **2.13.0**
@@ -29,7 +32,7 @@ This project is a clone like of git, a code versioning tool (and more generally 
     alias sgit="sgit-1.0"
 ```
 5. Refresh your bash file : `source .zshrc` or `source .bashrc`
-6. Enjoy the wonderfull **sgit** command 💪🏻
+6. Enjoy the wonderfull (but incomplete) **sgit** command 💪🏻
 
 
 
