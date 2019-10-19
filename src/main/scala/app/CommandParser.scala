@@ -1,6 +1,6 @@
 package app.command
 import app.command.{Initializer, AddCommand, Helper}
-import app.components.{Sgit, Stage, Branch, Blobs, Head}
+import app.components.{Sgit, Stage, Branch, Blobs, Head, Log}
 import app.command.Diff
 import java.io.File
 
@@ -68,6 +68,16 @@ case class CommandParser(params: Array[String]) {
         println("Error: It seems that your not in sgit project")
       }
 
+    case "log" =>
+      val optionPath: Option[String] = Sgit.getRepoPath()
+      val optionDirectory: Option[String] = Sgit.getSgitPath()
+      if (optionPath.isDefined && optionDirectory.isDefined) {
+        val sgitDirectory: String = optionDirectory.get
+        println(Log.getContent(sgitDirectory))
+      } else {
+        println("Error: It seems that your not in sgit project")
+      }
+
     case "status" =>
       val optionPath: Option[String] = Sgit.getRepoPath()
       val optionDirectory: Option[String] = Sgit.getSgitPath()
@@ -88,7 +98,7 @@ case class CommandParser(params: Array[String]) {
         val repoDirectory: String = optionPath.get
         val diff = Diff(sgitDirectory, repoDirectory)
         val res = diff.listOfDiff()
-        println(res)
+        println(res.mkString)
       } else {
         println("Error: It seems that your not in working directory")
       }

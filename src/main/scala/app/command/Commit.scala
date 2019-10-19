@@ -1,9 +1,7 @@
 package app.command
 import app.components.Stage
 import app.components.Tree
-import app.command.Status
 import app.components.{FileManager, Log, Head}
-import java.io.File
 
 case class Commit(
     sgitDirectory: String,
@@ -16,24 +14,30 @@ case class Commit(
 
   def save(): Option[String] = {
     //Prepare all the trees to save
-
-    val contentToSave =
-      prepareContent(stage.contentByLines)
+    val contentToSave = prepareContent(stage.contentByLines)
     if (contentToSave.isDefined) {
       val name = ""
       val olderCommit: String = head.content
-      val tree = Tree.createTree(name, contentToSave.get, sgitDirectory)
+      val tree =
+        Tree.createTree(name, contentToSave.get, sgitDirectory)
+      val subtreeHashes = tree.trees.map(tree => tree.hash).mkString
       val hash =
         // Not an I/O => RT Function createHash
         FileManager.createHash(name + contentToSave.mkString + sgitDirectory)
 
       val content =
-        s"oldCommit:$olderCommit\ntrees:$tree\nmessage:$message"
+        s"oldCommit:$olderCommit\ntrees:${tree.hash}\nmessage:$message"
       val path = s"${sgitDirectory}/commits"
+
       FileManager.createFile(hash, content, path)
 
       //Save new commit hash on HEAD
       head.update(hash, sgitDirectory)
+      tree.save()
+
+      // Save the current stage :
+      FileManager.delete(s"$sgitDirectory/.old/STAGE.old")
+      FileManager.createFile("STAGE.old", stage.content, s"$sgitDirectory/.old")
 
       // Save new version of Log  :
       val newlog =

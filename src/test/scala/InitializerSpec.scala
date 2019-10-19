@@ -12,7 +12,7 @@ class InitializerSpec extends FlatSpec with Matchers {
     initializer.initialise
     try test()
     finally {
-      val repo = Sgit.getRepoPath()
+      val repo = Sgit.getRepoPath().get
       val sgitDirectory = Sgit.getSgitPath()
       if (sgitDirectory.isDefined) {
         if (new File(s"$repo/.sgit").exists())

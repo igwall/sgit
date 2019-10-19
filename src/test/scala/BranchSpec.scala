@@ -1,8 +1,7 @@
 import org.scalatest._
-import app.components.{FileManager, Sgit}
+import app.components.{Branch, Head, FileManager, Sgit}
 import app.command.{Initializer}
 import java.io.File
-import app.components.Branch
 class BranchSpec extends FlatSpec with Matchers {
 
   override def withFixture(test: NoArgTest) = {
@@ -27,22 +26,25 @@ class BranchSpec extends FlatSpec with Matchers {
     val sgitDirectory = Sgit.getSgitPath().get
     FileManager.delete(sgitDirectory + "/HEAD")
     FileManager.createFile("HEAD", "uytezfze", sgitDirectory)
-    val res = Branch.createBranch("create-me", sgitDirectory)
+    val head = Head(sgitDirectory)
+    val res = Branch.createBranch("create-me", sgitDirectory, head)
     assert(res.get == "Branch correctly created")
   }
 
   it should "not create the branch" in {
     val sgitDirectory = Sgit.getSgitPath().get
-    Branch.createBranch("create-me", sgitDirectory)
-    val res = Branch.createBranch("create-me", sgitDirectory)
-    assert(res.get == "Branch already existing")
+    val head: Head = Head(sgitDirectory)
+    Branch.createBranch("create-me", sgitDirectory, head)
+    val dontCreate = Branch.createBranch("create-me", sgitDirectory, head)
+    assert(dontCreate.get == "Branch already existing")
   }
 
   it should "return None when HEAD is Empty" in {
     val sgitDirectory = Sgit.getSgitPath().get
     FileManager.delete(sgitDirectory + "/HEAD")
     FileManager.createFile("HEAD", "", sgitDirectory)
-    val res = Branch.createBranch("create-me-please", sgitDirectory)
+    val head: Head = Head(sgitDirectory)
+    val res = Branch.createBranch("create-me-please", sgitDirectory, head)
     assert(!res.isDefined)
   }
 

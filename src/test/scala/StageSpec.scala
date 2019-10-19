@@ -1,10 +1,7 @@
 import org.scalatest._
-import app.components.Stage
 import java.io.File
-import app.components.FileManager
-import app.components.Sgit
-import app.command.{Initializer, Commit, AddCommand}
-import app.components.{Blobs, Branch, Head}
+import app.components.{Sgit, Stage, Blobs, FileManager}
+import app.command.{Initializer, AddCommand}
 
 class StageSpec extends FlatSpec with Matchers {
 
@@ -26,82 +23,111 @@ class StageSpec extends FlatSpec with Matchers {
   }
 
   "Stage" should "add line into itself" in {
-    val sgitFolder = Sgit.getSgitPath().get
-    val repoFolder = Sgit.getRepoPath().get
-    val blob = Blobs.createBlob(
-      s"${repoFolder}/src/test/testEnvironment/file1.txt",
-      sgitFolder
+    val sgitDirectory = Sgit.getSgitPath().get
+    val workingDirectory = Sgit.getRepoPath().get
+    val blob = Blobs(
+      sgitDirectory,
+      workingDirectory,
+      "/src/test/testEnvironment/file1.txt"
     )
-    if (blob.isDefined) {
-      Stage.addElement(
-        blob.get,
-        s"${repoFolder}/src/test/testEnvironment/file1.txt",
-        sgitFolder,
-        repoFolder
+    val res = blob.save()
+    if (res.isDefined) {
+      val stage: Stage = Stage(sgitDirectory, workingDirectory)
+      val newStage = stage.addElement(
+        blob.hash,
+        "/src/test/testEnvironment/file1.txt"
       )
-      val stage = new File(sgitFolder + "PATH")
+      newStage.save()
       assert(
-        !FileManager.extractContentFromPath(sgitFolder + "/STAGE").isEmpty()
+        newStage.content.contains(
+          s"${blob.hash} ${stage.separator} /src/test/testEnvironment/file1.txt"
+        )
       )
     }
   }
+
   it should "edit the hash if the file is edited then added" in {
     //We edit the file1.txt to check that we could update the hash
-    val sgitFolder = Sgit.getSgitPath().get
-    val repoFolder = Sgit.getRepoPath().get
+    val sgitDirectory = Sgit.getSgitPath().get
+    val workingDirectory = Sgit.getRepoPath().get
 
-    Stage.addElement(
+    val stage: Stage = Stage(sgitDirectory, workingDirectory)
+    val newStage = stage.addElement(
       "aaaa",
-      s"${repoFolder}/src/test/testEnvironment/file1.txt",
-      sgitFolder,
-      repoFolder
+      s"${workingDirectory}/src/test/testEnvironment/file1.txt"
     )
 
-    Stage.addElement(
+    val finalStage = newStage.addElement(
       "bbbb",
-      s"${repoFolder}/src/test/testEnvironment/file1.txt",
-      sgitFolder,
-      repoFolder
+      s"${workingDirectory}/src/test/testEnvironment/file1.txt"
     )
-    val res = FileManager
-      .extractContentFromPath(s"${sgitFolder}${File.separator}STAGE")
-      .split("\n")
-      .size == 1
     assert(
-      res
+      finalStage.content.contains(
+        s"bbbb ${stage.separator} /src/test/testEnvironment/file1.txt"
+      )
     )
   }
 
   it should "clean the path" in {
-    val repoFolder = Sgit.getRepoPath().get
-    val path = s"${repoFolder}/5/6/monfichier.txt"
-    val cleanedPath = Stage.cleanPath(path, repoFolder)
+
+    val sgitDirectory = Sgit.getSgitPath().get
+    val workingDirectory = Sgit.getRepoPath().get
+    val stage: Stage = Stage(sgitDirectory, workingDirectory)
+    val path = s"${workingDirectory}/5/6/monfichier.txt"
+
+    val cleanedPath = stage.cleanPath(path)
     assert(cleanedPath == "/5/6/monfichier.txt")
   }
 
   it should "get all the paths" in {
-    val sgitFolder = Sgit.getSgitPath().get
-    val repoFolder = Sgit.getRepoPath().get
-    Stage.addElement(
-      "bbbb",
-      s"${repoFolder}/src/test/testEnvironment/file1.txt",
-      sgitFolder,
-      repoFolder
-    )
-    Stage.addElement(
+    val sgitDirectory = Sgit.getSgitPath().get
+    val workingDirectory = Sgit.getRepoPath().get
+    val stage: Stage = Stage(sgitDirectory, workingDirectory)
+    val newStage = stage.addElement(
       "aaaa",
-      s"${repoFolder}/src/test/testEnvironment/file2.txt",
-      sgitFolder,
-      repoFolder
+      "/src/test/testEnvironment/file1.txt"
     )
-    val paths = Stage.getAllPath(sgitFolder)
+
+    val finalStage = newStage.addElement(
+      "bbbb",
+      "/src/test/testEnvironment/file2.txt"
+    )
+    val paths = finalStage.getAllPath()
     assert(paths.size == 2)
   }
 
   it should "return a list of blob" in {
-    val sgitFolder = Sgit.getSgitPath().get
-    val blobs = Stage.getAllBlobs(sgitFolder)
+    val sgitDirectory = Sgit.getSgitPath().get
+    val workingDirectory = Sgit.getRepoPath().get
+    val stage: Stage = Stage(sgitDirectory, workingDirectory)
+    val newStage = stage.addElement(
+      "aaaa",
+      s"${workingDirectory}/src/test/testEnvironment/file1.txt"
+    )
+    val blobs = newStage.getAllBlobs()
+    assert(blobs.size == 1)
   }
+
+  it should "return correct tuple hash and path" in {
+    val sgitDirectory = Sgit.getSgitPath().get
+    val workingDirectory = Sgit.getRepoPath().get
+
+    val specialPath = s"$workingDirectory/src/test/testEnvironment"
+    FileManager.update("newFile.txt", "i'm content", specialPath)
+
+    val fileToAdd: String = "/src/test/testEnvironment/newFile.txt"
+    val blob = Blobs(sgitDirectory, workingDirectory, fileToAdd)
+    blob.save()
+    val stage = Stage(sgitDirectory, workingDirectory)
+    val add = AddCommand(sgitDirectory, workingDirectory)
+    val newStage = add.addToStage(fileToAdd, stage, blob)
+    newStage.save()
+    val finalStage = Stage(sgitDirectory, workingDirectory)
+    val res = finalStage.getTuplesHashPath()
+    assert(res.head._1 == blob.hash)
+    assert(res.head._2 == fileToAdd)
+  }
+  /*
 
   it should "construct a stage file" in {
     val sgitDirectory = Sgit.getSgitPath().get
@@ -157,5 +183,6 @@ class StageSpec extends FlatSpec with Matchers {
     val newStage = Stage.createStageFromMainTree(sgitDirectory, mainTree)
     Stage.importStage(sgitDirectory, newStage)
   }
+ */
 
 }

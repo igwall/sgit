@@ -1,6 +1,6 @@
 import java.io.File
 
-import app.command.{AddCommand, Initializer}
+import app.command.{Initializer}
 import org.scalatest._
 import app.components.{FileManager, Sgit}
 

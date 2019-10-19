@@ -1,6 +1,6 @@
 import org.scalatest._
 import app.components.Sgit
-import app.components.{FileManager, Stage}
+import app.components.{FileManager, Stage, Blobs}
 import app.command.Status
 import app.command.{AddCommand, Initializer}
 import java.io.File
@@ -9,8 +9,10 @@ import app.command.Commit
 class Status extends FlatSpec with Matchers {
 
   override def withFixture(test: NoArgTest) = {
+
     val initializer = new Initializer()
     initializer.initialise
+
     val sgitDirectory = Sgit.getSgitPath().get
     val workingDirectory = Sgit.getRepoPath().get
 
@@ -20,14 +22,15 @@ class Status extends FlatSpec with Matchers {
       s"$workingDirectory/src/test/testEnvironment"
     )
 
-    val add = new AddCommand(
-      s"$sgitDirectory/src/test/testEnvironment/file1.txt",
-      workingDirectory,
-      sgitDirectory
-    )
-    add.addToStage()
+    val fileToAdd: String = "/src/test/testEnvironment/file1.txt"
+    val blob = Blobs(sgitDirectory, workingDirectory, fileToAdd)
+    val stage = Stage(sgitDirectory, workingDirectory)
+    val add = AddCommand(sgitDirectory, workingDirectory)
+    val newStage = add.addToStage(fileToAdd, stage, blob)
+    newStage.save()
 
-    Commit.create(sgitDirectory, "status", workingDirectory)
+    val commit: Commit = Commit(sgitDirectory, workingDirectory, "i'm a commit")
+    commit.save()
 
     FileManager.update(
       "file1.txt",
@@ -44,34 +47,31 @@ class Status extends FlatSpec with Matchers {
   "Status" should "found untracked files: " in {
     val sgitDirectory = Sgit.getSgitPath().get
     val workingDirectory = Sgit.getRepoPath().get
-    val files = Status.getUntrackedFiles(
-      sgitDirectory,
-      s"$workingDirectory/src/test/testEnvironment"
-    )
-    assert(!files.isEmpty())
+    val specialPath = s"$workingDirectory/src/test/testEnvironment"
+    val status = Status(sgitDirectory, specialPath)
+    val untrackedFiles = status.getUntrackedFiles()
+    assert(!untrackedFiles.isEmpty())
   }
 
   it should "find all the files added between two commits" in {
     val sgitDirectory = Sgit.getSgitPath().get
     val workingDirectory = Sgit.getRepoPath().get
-    FileManager.createFile(
-      "test2.txt",
-      "hello, thanks to read this",
-      s"$workingDirectory/src/test/testEnvironment"
-    )
-    Stage.addElement(
-      "jfkyf",
-      "/src/test/testEnvironment/file2.txt",
-      sgitDirectory,
-      workingDirectory
-    )
-    val res = Status.getchangesToBeCommited(
-      s"$sgitDirectory"
-    )
-    assert(res == "-  /src/test/testEnvironment/file2.txt\n")
+
+    val specialPath = s"$workingDirectory/src/test/testEnvironment"
+
+    val fileToAdd: String = "/src/test/testEnvironment/newFile.txt"
+    val blob = Blobs(sgitDirectory, workingDirectory, fileToAdd)
+    val stage = Stage(sgitDirectory, workingDirectory)
+    val add = AddCommand(sgitDirectory, workingDirectory)
+    val newStage = add.addToStage(fileToAdd, stage, blob)
+    newStage.save()
+
+    val status =
+      Status(sgitDirectory, specialPath)
+    val changesToBeCommited = status.getchangesToBeCommited()
+    assert(changesToBeCommited == "-  /src/test/testEnvironment/newFile.txt\n")
   }
 
-/*
   it should "find an updated file" in {
     val workingDirectory = Sgit.getRepoPath().get
     val sgitDirectory = Sgit.getSgitPath().get
@@ -80,10 +80,11 @@ class Status extends FlatSpec with Matchers {
       "igwall is back",
       s"$workingDirectory/src/test/testEnvironment"
     )
+    val status =
+      Status(sgitDirectory, s"$workingDirectory/src/test/testEnvironment/")
     assert(
-      !Status.getFilesStagedButEdited(sgitDirectory, workingDirectory).isEmpty
+      !status.getFilesStagedButEdited().isEmpty
     )
   }
-  */
 
 }

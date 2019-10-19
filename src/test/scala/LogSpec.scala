@@ -2,8 +2,8 @@ package example
 import java.io.File
 import org.scalatest._
 import app.components.Sgit
-import app.command.{Commit, Initializer}
-import app.components.FileManager
+import app.command.{Initializer}
+import app.components.{FileManager}
 import app.components.Log
 
 class LogSpec extends FlatSpec with Matchers {
@@ -23,9 +23,11 @@ class LogSpec extends FlatSpec with Matchers {
   }
 
   "The log" should "be updated after a commit" in {
-    val repo = Sgit.getRepoPath().get
     val sgitDirectory = Sgit.getSgitPath().get
-    Commit.create(sgitDirectory, "commit", repo)
-    assert(!Log.getContent(sgitDirectory).isEmpty())
+    val log = Log(sgitDirectory)
+    val res = log.update("NEW CONTENT")
+    res.save()
+    val logCHeck = Log(sgitDirectory)
+    assert(logCHeck.content.contains("NEW CONTENT"))
   }
 }

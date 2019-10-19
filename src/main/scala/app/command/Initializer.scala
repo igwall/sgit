@@ -1,7 +1,6 @@
 package app.command
 import java.io.File
-import app.components.{FileManager, Branch}
-import java.nio.file.FileAlreadyExistsException
+import app.components.{FileManager}
 import java.nio.file.Paths
 import scala.annotation.tailrec
 import app.components.FileManager

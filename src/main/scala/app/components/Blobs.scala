@@ -1,5 +1,5 @@
 package app.components
-import app.components.{Sgit, FileManager}
+import app.components.{FileManager}
 import java.security.MessageDigest
 
 case class Blobs(
@@ -44,9 +44,16 @@ object Blobs {
       workingDirectory: String,
       filePath: String
   ): Blobs = {
-    val content =
-      FileManager.extractContentFromPath(s"$workingDirectory/$filePath")
-    new Blobs(sgitDirectory, content, filePath)
+    if (filePath.contains(workingDirectory)) {
+      val content =
+        FileManager.extractContentFromPath(s"$filePath")
+      new Blobs(sgitDirectory, content, filePath)
+    } else {
+      val content =
+        FileManager.extractContentFromPath(s"$workingDirectory/$filePath")
+      new Blobs(sgitDirectory, content, filePath)
+    }
+
   }
 
   def getFromHash(sgitDirectory: String, blobHash: String): Blobs = {

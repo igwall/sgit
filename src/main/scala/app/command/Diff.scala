@@ -9,22 +9,22 @@ import app.components.FileManager
 case class Diff(
     sgitDirectory: String,
     workingDirectory: String,
-    contentBlobAndPath: List[(List[String], List[String])] ){
-
-
+    contentBlobAndPath: List[(String, List[String], List[String])]
+) {
 
   def listOfDiff(): List[String] = {
     contentBlobAndPath.map {
-      case (blobFile, realFile) => makeDiff(blobFile, realFile)
+      case (name, blobFile, realFile) =>
+        s""" ${name}\n
+      ${makeDiff(blobFile, realFile).mkString}
+      """
     }
     // Récupérer le path pour dire qu'on fait le diff la dessus : /src/xxx.txt et avec les diffs en deesous
     // Séparer les blobs des paths
     // Pour chaque Blob et chaque path (Dans un map)
   }
 
-
-
-def makeDiff(
+  def makeDiff(
       oldFile: List[String],
       newFile: List[String]
   ): String = {
@@ -240,18 +240,20 @@ def makeDiff(
 
 }
 
-
 object Diff {
   def apply(sgitDirectory: String, workingDirectory: String): Diff = {
     val stage = Stage(sgitDirectory, workingDirectory)
     val hashAndPath = stage.getTuplesHashPath()
     val contentBlobAndPath = hashAndPath.map { hashAndPath =>
       (
+        hashAndPath._2,
+        // Extract content save in stage
         Blobs
-          .getFromHash(hashAndPath._1, sgitDirectory)
+          .getFromHash(sgitDirectory, hashAndPath._1)
           .content
           .split("\n")
           .toList,
+        // EXtract content of real file
         FileManager
           .extractContentFromShortenPath(hashAndPath._2, workingDirectory)
           .split("\n")
@@ -262,6 +264,5 @@ object Diff {
   }
 
   // Main part of the "diff" algorithm between two files
-  
 
 }

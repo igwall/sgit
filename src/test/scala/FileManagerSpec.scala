@@ -36,6 +36,7 @@ class FileManagerSpec extends FlatSpec with Matchers {
         s"$repoPath/src/test/testEnvironment",
         s"$repoPath/src/test/testEnvironment"
       )
+    assert(listOfFiles.size == 7)
   }
 
 }

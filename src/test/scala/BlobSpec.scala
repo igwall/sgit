@@ -28,15 +28,22 @@ class BlobSpec extends FlatSpec with Matchers {
     assert(hash1.equals(hash2))
   }
   it should "register in blob folder" in {
+
+    val workingDirectory = Sgit.getRepoPath().get
+    val sgitDirectory = Sgit.getSgitPath().get
+
     val optionSgitFolder = Sgit.getSgitPath()
-    val repoFolder = Sgit.getRepoPath().get
     if (optionSgitFolder.isDefined) {
-      val blob = Blobs.createBlob(
-        s"$repoFolder/src/test/testEnvironment/file1.txt",
-        optionSgitFolder.get
+      val blob = Blobs(
+        sgitDirectory,
+        workingDirectory,
+        s"/src/test/testEnvironment/file1.txt"
       )
-      assert(blob.isDefined)
-      assert(!blob.get.isEmpty())
+      val res = blob.save()
+
+      assert(res.isDefined)
+      assert(!blob.content.isEmpty())
+      assert(new File(s"$sgitDirectory/blobs/${blob.hash}").exists())
     }
 
   }

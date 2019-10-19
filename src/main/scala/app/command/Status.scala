@@ -2,6 +2,8 @@ package app.command
 import app.components.{Stage, Blobs, FileManager}
 
 case class Status(
+    sgitDirectory: String,
+    workingDirectory: String,
     stage: Stage,
     // (path, fakeBlob) => fakeBlob is a blob from real content and not the one in stage
     allFilesPathContentBlob: List[(String, Blobs)]
@@ -9,20 +11,27 @@ case class Status(
 
   def getUntrackedFiles(): String = {
     val res = allFilesPathContentBlob.filter(file => !stage.contains(file._1))
-    res.filter(line => line != "").map(elem => s"-  $elem \n").mkString
+    res
+      .filter(line => line != "")
+      .map(elem => s"-  ${elem._1} \n")
+      .mkString
   }
 
   def getchangesToBeCommited(): String = {
     // Get all the files added between two commits
-    stage
+    val res = stage
       .newFiles()
       .filter(path => path.size > 0)
       .map(path => s"-  $path\n")
       .mkString
+    res
   }
 
   def getFilesStagedButEdited(): String = {
-    val filtered = allFilesPathContentBlob
+    // Check that the files are in stage
+    val filesInStage =
+      allFilesPathContentBlob.filter(elem => stage.contains(elem._1))
+    val filtered = filesInStage
       .filter(
         elem =>
           !stage
@@ -59,15 +68,18 @@ object Status {
     val stage: Stage = Stage(sgitDirectory, workingDirectory)
     val allFilesPaths =
       FileManager.getAllFilesFromPath(workingDirectory, workingDirectory)
-
     val allFilesPathsAndContent = allFilesPaths.map(
       path =>
         (
           path,
-          Blobs(sgitDirectory, workingDirectory, workingDirectory + path)
+          Blobs(
+            sgitDirectory,
+            workingDirectory,
+            path
+          )
         )
     )
-    new Status(stage, allFilesPathsAndContent)
+    new Status(sgitDirectory, workingDirectory, stage, allFilesPathsAndContent)
   }
 
 }

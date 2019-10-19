@@ -18,3 +18,6 @@ assemblyOption in assembly := (assemblyOption in assembly).value
 assemblyJarName in assembly := s"${name.value}-${version.value}"
 
 parallelExecution in Test := false
+scalacOptions ++= Seq(
+  "-Xlint:unused"
+)

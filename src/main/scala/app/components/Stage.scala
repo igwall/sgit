@@ -1,8 +1,7 @@
 package app.components
 import java.io.File
 import scala.annotation.tailrec
-import app.command.Commit
-import app.components.{Tree, Blobs}
+//import app.components.{Tree, Blobs}
 
 case class Stage(
     sgitDirectory: String,
@@ -15,20 +14,15 @@ case class Stage(
   val contentByLines = content.split("\n").toList
 
   // Return a new stage edited
-  def addElement(
-      hash: String,
-      path: String,
-      sgitDirectory: String,
-      repoDirectory: String
-  ): Stage = {
-    val fullpath = s"$repoDirectory/$path"
+  def addElement(hash: String, path: String): Stage = {
     //Check that the STAGE path is at the good place
     //If our path in already in stage, we only update blob hash
-    if (isInStage(path)) {
-      val newContent = updateHash(hash, path)
+    val cleanedPath = cleanPath(path)
+    if (isInStage(cleanedPath)) {
+      val newContent = updateHash(hash, cleanedPath)
       new Stage(sgitDirectory, workingDirectory, newContent, oldContent)
     } else {
-      val newContent = content + s"$hash ${separator} $path\n"
+      val newContent = content + s"$hash ${separator} $cleanedPath\n"
       new Stage(sgitDirectory, workingDirectory, newContent, oldContent)
     }
   }
@@ -58,16 +52,15 @@ case class Stage(
   def save(): Unit = {
     FileManager.delete(getPath(sgitDirectory))
     FileManager.createFile("STAGE", content, sgitDirectory)
-    FileManager.delete(s"$sgitDirectory/.old/STAGE.old")
-    FileManager.createFile("STAGE.old", oldContent, s"$sgitDirectory/.old")
   }
 
   def getPath(sgitDirectory: String): String = {
     s"${sgitDirectory}${File.separator}STAGE"
   }
 
-  def cleanPath(path: String, projectDirectory: String): String = {
-    path drop projectDirectory.size
+  def cleanPath(path: String): String = {
+    if (path.contains(workingDirectory)) path drop workingDirectory.size
+    else path
   }
 
   def delete(path: String): String = {
@@ -113,8 +106,12 @@ case class Stage(
         paths: List[String],
         res: List[(String, String)]
     ): List[(String, String)] = {
-      if (blobs.tail.isEmpty || paths.isEmpty) {
+
+      // If there is no files in stage
+      if (blobs.isEmpty || paths.isEmpty) {
         res
+      } else if (blobs.tail.isEmpty || paths.tail.isEmpty) {
+        (blobs.head, paths.head) +: res
       } else {
         val newRes = (blobs.head, paths.head) +: res
         createTuple(blobs.tail, paths.tail, newRes)

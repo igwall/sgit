@@ -1,6 +1,5 @@
 package app.components
 import app.components.{FileManager, Branch}
-import java.io.File
 
 case class Head(sgitDirectory: String, content: String, branch: Branch) {
   def update(content: String, sgitDirectory: String) {

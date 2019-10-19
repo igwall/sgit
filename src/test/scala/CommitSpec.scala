@@ -2,7 +2,7 @@ import org.scalatest._
 import app.command.Commit
 import java.io.File
 import app.command.{Initializer}
-import app.components.{Stage, Sgit, FileManager}
+import app.components.{Stage, Sgit, FileManager, Head, Log}
 
 class CommitSpec extends FlatSpec with Matchers {
 
@@ -12,14 +12,12 @@ class CommitSpec extends FlatSpec with Matchers {
     init.initialise
 
     val sgitDirectory = Sgit.getSgitPath().get
-    val repoDirectory = Sgit.getRepoPath().get
+    val workingDirectory = Sgit.getRepoPath().get
 
-    Stage.addElement(
-      "monhashtestcommit",
-      "/test/test/test/",
-      sgitDirectory,
-      repoDirectory
-    )
+    val stage = Stage(sgitDirectory, workingDirectory)
+    val newStage =
+      stage.addElement("monhash", "monpath")
+    newStage.save()
     // Fait le test
     try test()
     finally {
@@ -34,8 +32,21 @@ class CommitSpec extends FlatSpec with Matchers {
 
   "Commit" should "add new file in commit with his own hash" in {
     val sgitDirectory = Sgit.getSgitPath().get
-    val repoDirectory = Sgit.getRepoPath().get
-    val res = Commit.create(sgitDirectory, "message", repoDirectory)
+    val workingDirectory = Sgit.getRepoPath().get
+    val head: Head = Head(sgitDirectory)
+    val stage: Stage = Stage(sgitDirectory, workingDirectory)
+    val log = Log(sgitDirectory)
+
+    val commit =
+      Commit(
+        sgitDirectory,
+        workingDirectory,
+        stage,
+        log,
+        head,
+        "my wonderfull message"
+      )
+    val res = commit.save
     assert(res.isDefined)
   }
 }

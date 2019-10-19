@@ -7,8 +7,10 @@ import app.command.Initializer
 class AddSpec extends FlatSpec with Matchers {
 
   override def withFixture(test: NoArgTest) = {
-    val initializer = new Initializer()
-    initializer.initialise
+    // avant le test
+    val init = new Initializer()
+    init.initialise
+    // Fait le test
     try test()
     finally {
       val repo = Sgit.getRepoPath()
@@ -20,33 +22,21 @@ class AddSpec extends FlatSpec with Matchers {
     }
   }
 
-  val optionWorkingDirectory: Option[String] = Sgit.getRepoPath()
-  val optionSgitDirectory: Option[String] = Sgit.getSgitPath()
-  if (optionSgitDirectory.isDefined && optionWorkingDirectory.isDefined) {
-    val workingDirectory: String = optionWorkingDirectory.get
-    val sgitDirectory: String = optionSgitDirectory.get
+  "The add command" should "receive the path from parser" in {
 
-    "The add command" should "receive the path from parser" in {
-      val fileToAdd: String = "/src/test/testEnvironment/file1.txt"
-      val fileToAdd2: String = "/src/test/testEnvironment/file3.txt"
-      val blob = Blobs(sgitDirectory, workingDirectory, fileToAdd)
-      val stage = Stage(sgitDirectory, workingDirectory)
-      val add = AddCommand(sgitDirectory, workingDirectory)
-      val newStage = add.addToStage(fileToAdd, stage, blob)
-      assert(newStage.contains(fileToAdd))
-    }
+    val workingDirectory: String = Sgit.getRepoPath().get
+    val sgitDirectory: String = Sgit.getSgitPath().get
 
-    it should "create a blob from the path given in parameter: " in {
-      val init = new Initializer()
-      init.initialise
-      val repoDirectory = Sgit.getRepoPath().get
-      val hashedValue = Blobs.createBlob(
-        s"$repoDirectory/src/test/testEnvironment/file1.txt",
-        sgitDirectory
-      )
-      assert(hashedValue.isDefined)
-      assert(new File(s"$sgitDirectory/blobs/" + hashedValue.get).exists)
-    }
+    val fileToAdd: String = "/src/test/testEnvironment/file1.txt"
+    val fileToAdd2: String = "/src/test/testEnvironment/file3.txt"
+    val blob = Blobs(sgitDirectory, workingDirectory, fileToAdd)
+    val stage = Stage(sgitDirectory, workingDirectory)
+    val add = AddCommand(sgitDirectory, workingDirectory)
+    val newStage = add.addToStage(fileToAdd, stage, blob)
+    val blob2 = Blobs(sgitDirectory, workingDirectory, fileToAdd2)
+    val add2 = AddCommand(sgitDirectory, workingDirectory)
+    val lastStage = add2.addToStage(fileToAdd2, newStage, blob2)
+    assert(lastStage.contains(fileToAdd) && lastStage.contains(fileToAdd2))
   }
 
 }

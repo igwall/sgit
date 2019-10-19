@@ -1,12 +1,11 @@
 package app.command
 import app.components.Blobs
 import app.components.Stage
-import app.components.{FileManager, Stage}
-import java.io.File
+import app.components.{Stage}
 
 case class AddCommand(
     val workingDirectory: String,
-    val sgitDirectory: String,
+    val sgitDirectory: String
 ) {
 
   def addToStage(file: String, stage: Stage, blob: Blobs): Stage = {
@@ -14,9 +13,7 @@ case class AddCommand(
     //If the blob is correctly created
     stage.addElement(
       blob.hash,
-      file,
-      sgitDirectory,
-      workingDirectory
+      file
     )
 
   }
@@ -26,7 +23,7 @@ object AddCommand {
 
   def apply(
       sgitDirectory: String,
-      repoDirectory: String,
+      repoDirectory: String
   ): AddCommand = {
     new AddCommand(repoDirectory, sgitDirectory)
   }

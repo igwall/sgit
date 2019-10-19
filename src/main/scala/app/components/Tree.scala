@@ -1,5 +1,4 @@
 package app.components
-import java.io.File
 
 case class Tree(
     name: String,
