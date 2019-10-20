@@ -29,7 +29,7 @@ case class CommandParser(params: Array[String]) {
       if (optionPath.isDefined && optionDirectory.isDefined) {
         val workingDirectory: String = optionPath.get
         val sgitDirectory: String = optionDirectory.get
-        if (new File(s"$workingDirectory/${params(1)}").exists) {
+        if (new File(s"$workingDirectory/${params(1)}").exists && !new File(s"$workingDirectory/${params(1)}").isDirectory()) {
           val stage = Stage(sgitDirectory, workingDirectory)
           val blob = Blobs(sgitDirectory, workingDirectory, params(1))
           blob.save
