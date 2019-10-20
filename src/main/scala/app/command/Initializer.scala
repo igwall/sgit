@@ -20,7 +20,8 @@ class Initializer() {
   def initialise: Option[String] = {
 
     val path = Paths.get("").toAbsolutePath().toString()
-    val folders = List("tags", "commits", "trees", "blobs", "branches", ".old")
+    val folders =
+      List("tags", "commits", "trees", "blobs", "branches", ".old")
     val files = List("STAGE", "HEAD", "branches/master", "log")
 
     val sgitRepo = new File(".sgit")

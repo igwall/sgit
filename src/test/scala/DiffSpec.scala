@@ -50,11 +50,8 @@ class DiffSpec extends FlatSpec with Matchers {
     val workingDirectory = Sgit.getRepoPath().get
     val specialPath = s"$workingDirectory/src/test/testEnvironment"
     FileManager.update("newFile.txt", "i'm not a secret content", specialPath)
-    println("go for diff")
     val diff = Diff(sgitDirectory, workingDirectory)
-    println("end of diff")
     val res = diff.listOfDiff()
-    println(res)
     assert(!res.isEmpty)
   }
 

@@ -1,6 +1,6 @@
 package app.command
 import app.command.{Initializer, AddCommand, Helper}
-import app.components.{Sgit, Stage, Branch, Blobs, Head, Log}
+import app.components.{Sgit, Stage, Branch, Blobs, Head, Log, Tag}
 import app.command.Diff
 import java.io.File
 
@@ -102,11 +102,10 @@ case class CommandParser(params: Array[String]) {
       } else {
         println("Error: It seems that your not in working directory")
       }
+
     case "branch" =>
-      val optionPath: Option[String] = Sgit.getRepoPath()
       val optionDirectory: Option[String] = Sgit.getSgitPath()
       val sgitDirectory: String = optionDirectory.get
-      val repoDirectory: String = optionPath.get
       if (params.length == 2 && params(1) == "-av") {
 
         val message = Branch.getAllBranches(sgitDirectory)
@@ -122,9 +121,32 @@ case class CommandParser(params: Array[String]) {
         }
       } else {
         println(
-          "This command doesn't exist.. Type sgit --help for more informations"
+          "This command doesn't exist.. Type sgit help for more informations"
         )
       }
+
+    case "tag" =>
+      val optionDirectory: Option[String] = Sgit.getSgitPath()
+      val sgitDirectory: String = optionDirectory.get
+      if (params.length == 2 && params(1) == "-av") {
+
+        val message = Tag.getAllTag(sgitDirectory)
+        println(message)
+
+      } else if (params.length == 2 && !params(1).contains("-")) {
+        val head = Head(sgitDirectory)
+        val message = Tag.createTag(params(1), sgitDirectory, head)
+        if (message.isDefined) {
+          println(message.get)
+        } else {
+          println("fatal: Not a valid object name: 'master'.")
+        }
+      } else {
+        println(
+          "This command doesn't exist.. Type sgit help for more informations"
+        )
+      }
+
     case _ =>
       println("Unknow command prompted...")
       println(Helper.getHelp)
