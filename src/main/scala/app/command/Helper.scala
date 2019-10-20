@@ -21,9 +21,6 @@ ${Console.YELLOW}branch${Console.RESET}      Create a new branch
 ${Console.YELLOW}branch -av${Console.RESET}  List all branches 
             > sgit branch -av\n 
 
-${Console.YELLOW}checkout${Console.RESET}    Switch branches 
-            > sgit checkout branchName\n
-
 ${Console.YELLOW}commit${Console.RESET}      Record changes to the repository 
             > sgit commit
 ${Console.YELLOW}commit -m${Console.RESET}   Record changes with a specific message 
