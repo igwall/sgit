@@ -15,8 +15,10 @@ This project is a clone like of git, a code versioning tool (and more generally 
 - ✅ Commit
 - ✅ Status
 - ✅ Diff
-- ✅ Log
+- ✅ Log (without option)
 - ✅ Help
+- ✅ Tag
+- ✅ Branch
 - 🕓 Checkout
 
 ### Installation (manual) :
@@ -68,6 +70,11 @@ This command show the differents between your current stage status (all the file
 This command allow you to create branches : 
 - `sgit branch myBranchName` will create a new branch. 
 - `sgit branch -av` show you all the branches
+
+#### tag
+This command allow you to create tag : 
+- `sgit tag myTagName` will create a new tag. 
+- `sgit tag -av` show you all the tags existing.
 
 #### log
 This command display the history of commit (hash and messages). 
